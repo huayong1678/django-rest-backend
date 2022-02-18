@@ -1,0 +1,8 @@
+Django
+django-cors-headers
+django-storages
+djangorestframework
+aws-psycopg2
+boto3
+djangorestframework-jwt
+PyJWT
