@@ -164,8 +164,8 @@ AWS_S3_CUSTOM_DOMAIN = 'd1wne19icordtc.cloudfront.net'
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
-# AWS_DEFAULT_ACL = 'public-read'
-AWS_DEFAULT_ACL = None
+AWS_DEFAULT_ACL = 'public-read'
+# AWS_DEFAULT_ACL = None
 AWS_QUERYSTRING_EXPIRE = 120
 
 STATICFILES_LOCATION = 'static'  # staticfiles will be in 'static'
