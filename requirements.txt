@@ -6,3 +6,5 @@ aws-psycopg2
 boto3
 djangorestframework-jwt
 PyJWT
+pytz
+aws-psycopg2
