@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'users',
-    'storages',
+    # 'storages',
+    'django_s3_storage',
     'zappa_django_utils',
 ]
 
