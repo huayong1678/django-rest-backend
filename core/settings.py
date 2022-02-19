@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = ')61$)qzp=ie*1i^rt4!rz573(2dvd(8*xlx3z_^4b!u^&nx1x('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['https://tp4y0cq38c.execute-api.us-east-1.amazonaws.com', 'localhost:8000']
 
 
 # Application definition
@@ -66,7 +66,7 @@ MIDDLEWARE = [
 ] 
 
 # CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = ['https://tp4y0cq38c.execute-api.us-east-1.amazonaws.com', 'https://localhost:8080', 'https://d1wne19icordtc.cloudfront.net']
+CORS_ORIGIN_WHITELIST = ['https://localhost:8080', 'https://d1wne19icordtc.cloudfront.net']
 CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'core.urls'
