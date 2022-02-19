@@ -178,6 +178,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # S3_BUCKET_NAME = "etl-static"
 # STATICFILES_STORAGE = "core.storage.StaticS3Storage"
 AWS_S3_BUCKET_NAME = "etl-static"
+AWS_S3_BUCKET_NAME_STATIC = AWS_S3_BUCKET_NAME
 AWS_S3_ADDRESSING_STYLE = "auto"
 STATICFILES_STORAGE = "django_s3_storage.storage.StaticS3Storage"
 DEFAULT_FILE_STORAGE = "django_s3_storage.storage.S3Storage"
