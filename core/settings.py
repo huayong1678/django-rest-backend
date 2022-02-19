@@ -65,8 +65,8 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ] 
 
-CORS_ORIGIN_ALLOW_ALL = True
-# CORS_ORIGIN_WHITELIST = ['https://localhost:8080', 'https://d1wne19icordtc.cloudfront.net', 'http://127.0.0.1:8000']
+# CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = ['https://tp4y0cq38c.execute-api.us-east-1.amazonaws.com', 'https://localhost:8080', 'https://d1wne19icordtc.cloudfront.net']
 CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'core.urls'
