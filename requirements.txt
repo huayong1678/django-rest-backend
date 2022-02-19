@@ -8,3 +8,4 @@ djangorestframework-jwt
 PyJWT
 pytz
 aws-psycopg2
+zappa-django-utils

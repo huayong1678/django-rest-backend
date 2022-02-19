@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'users',
     'storages',
+    'zappa_django_utils',
 ]
 
 REST_FRAMEWORK = {
