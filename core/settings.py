@@ -156,11 +156,11 @@ USE_TZ = True
 
 # STATICFILES_STORAGE = 'core.storage.StaticStorage'
 
-# AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-# AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 # AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "etl-static")
-# AWS_S3_REGION_NAME = 'us-east-1'
-# AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_REGION_NAME = 'us-east-1'
+AWS_S3_SIGNATURE_VERSION = 's3v4'
 # AWS_S3_CUSTOM_DOMAIN = 'd1wne19icordtc.cloudfront.net'
 # AWS_S3_OBJECT_PARAMETERS = {
 #     'CacheControl': 'max-age=86400',
@@ -175,13 +175,17 @@ USE_TZ = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-S3_BUCKET_NAME = "etl-static"
-STATICFILES_STORAGE = "core.storage.StaticS3Storage"
-AWS_S3_BUCKET_NAME_STATIC = S3_BUCKET_NAME
+# S3_BUCKET_NAME = "etl-static"
+# STATICFILES_STORAGE = "core.storage.StaticS3Storage"
+AWS_S3_BUCKET_NAME = "etl-static"
+AWS_S3_ADDRESSING_STYLE = "auto"
+STATICFILES_STORAGE = "django_s3_storage.storage.StaticS3Storage"
+DEFAULT_FILE_STORAGE = "django_s3_storage.storage.S3Storage"
+# AWS_S3_BUCKET_NAME_STATIC = S3_BUCKET_NAME
 STATICFILES_LOCATION = 'static'
 
 # to serve the static files from your s3 bucket
-AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % S3_BUCKET_NAME
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_S3_BUCKET_NAME
 STATIC_URL = "https://%s/" % AWS_S3_CUSTOM_DOMAIN
 
 AUTH_USER_MODEL = 'users.User'
