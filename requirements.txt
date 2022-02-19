@@ -1,6 +1,7 @@
 Django
 django-cors-headers
-django-storages
+# django-storages
+django-s3-storage
 djangorestframework
 aws-psycopg2
 boto3
