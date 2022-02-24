@@ -8,3 +8,5 @@ class StaticStorage(S3Boto3Storage):
     def __init__(self, *args, **kwargs):
         kwargs['custom_domain'] = settings.AWS_S3_CUSTOM_DOMAIN
         super(StaticStorage, self).__init__(*args, **kwargs)
+
+User =settings.AUTH_USER_MODEL
