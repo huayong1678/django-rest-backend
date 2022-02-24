@@ -6,7 +6,7 @@ djangorestframework
 aws-psycopg2
 boto3
 djangorestframework-jwt
-PyJWT
+PyJWT==1.7.1
 pytz
 aws-psycopg2
 zappa-django-utils

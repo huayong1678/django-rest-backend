@@ -24,10 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = ')61$)qzp=ie*1i^rt4!rz573(2dvd(8*xlx3z_^4b!u^&nx1x('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['tp4y0cq38c.execute-api.us-east-1.amazonaws.com', 'localhost:8000']
-
+# Backend Address
+# ALLOWED_HOSTS = ['tp4y0cq38c.execute-api.us-east-1.amazonaws.com', 'localhost:8000']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -41,7 +43,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'users',
-    # 'storages',
     'django_s3_storage',
     'zappa_django_utils',
 ]
@@ -50,9 +51,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-    'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-    ],
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    # ],
 }
 
 MIDDLEWARE = [
@@ -66,8 +67,8 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ] 
 
-# CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = ['https://localhost:8080', 'https://d1wne19icordtc.cloudfront.net']
+CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_WHITELIST = ['http://localhost:3000', 'https://d1wne19icordtc.cloudfront.net']
 CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'core.urls'
@@ -113,6 +114,8 @@ else:
         }
     }
 
+# Custome User Model
+AUTH_USER_MODEL = 'users.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -158,36 +161,18 @@ USE_TZ = True
 
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-# AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "etl-static")
-# AWS_S3_REGION_NAME = 'us-east-1'
 AWS_REGION = 'us-east-1'
 AWS_S3_SIGNATURE_VERSION = 's3v4'
-# AWS_S3_CUSTOM_DOMAIN = 'd1wne19icordtc.cloudfront.net'
-# AWS_S3_OBJECT_PARAMETERS = {
-#     'CacheControl': 'max-age=86400',
-# }
-# AWS_DEFAULT_ACL = 'public-read'
-# # AWS_DEFAULT_ACL = None
-# AWS_QUERYSTRING_EXPIRE = 120
-
-# STATICFILES_LOCATION = 'static'  # staticfiles will be in 'static'
-# STATIC_URL = '//%s/%s/' % (AWS_S3_CUSTOM_DOMAIN,
-# STATICFILES_LOCATION)
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# S3_BUCKET_NAME = "etl-static"
-# STATICFILES_STORAGE = "core.storage.StaticS3Storage"
 AWS_S3_BUCKET_NAME = "etl-static"
 AWS_S3_BUCKET_NAME_STATIC = AWS_S3_BUCKET_NAME
 AWS_S3_ADDRESSING_STYLE = "auto"
 STATICFILES_STORAGE = "django_s3_storage.storage.StaticS3Storage"
 DEFAULT_FILE_STORAGE = "django_s3_storage.storage.S3Storage"
-# AWS_S3_BUCKET_NAME_STATIC = S3_BUCKET_NAME
 STATICFILES_LOCATION = 'static'
 
 # to serve the static files from your s3 bucket
 AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_S3_BUCKET_NAME
 STATIC_URL = "https://%s/" % AWS_S3_CUSTOM_DOMAIN
-
-AUTH_USER_MODEL = 'users.User'
