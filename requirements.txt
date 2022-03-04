@@ -10,3 +10,4 @@ PyJWT==1.7.1
 pytz
 aws-psycopg2
 zappa-django-utils
+bcrypt

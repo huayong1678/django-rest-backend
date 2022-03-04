@@ -1,4 +1,3 @@
-from rest_framework import generics
 from .models import Source
 from .serializers import SourceSerializer
 from logging import raiseExceptions
@@ -6,14 +5,14 @@ from urllib import response
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
+from .serializers import SourceSerializer
+from .models import Source
 import jwt, datetime
+from django.contrib.auth.hashers import make_password, check_password
 
-class ListSource(generics.ListCreateAPIView):
-    def get(self, request):
-        queryset = Source.objects.all()
-        serializer_class = SourceSerializer
+class CreateSource(APIView):
+    def post(self, request):
         token = request.COOKIES.get('jwt')
 
         if not token:
@@ -24,14 +23,14 @@ class ListSource(generics.ListCreateAPIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('Unauthenticated!')
         
-        source = Source.objects.all()
-        serializer = SourceSerializer(source)
+        serializer = SourceSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        # serializer.set_password(serializer.password)
         return Response(serializer.data)
 
-class DetailSource(generics.RetrieveUpdateDestroyAPIView):
+class ListSource(APIView):
     def get(self, request):
-        queryset = Source.objects.all()
-        serializer_class = SourceSerializer
         token = request.COOKIES.get('jwt')
 
         if not token:
@@ -41,7 +40,27 @@ class DetailSource(generics.RetrieveUpdateDestroyAPIView):
             payload = jwt.decode(token, 'secret', algorithm=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('Unauthenticated!')
-        
-        source = Source.objects.all()
+
+        source = Source.objects.filter(owner_id=payload['id']).first()
+        serializer = SourceSerializer
         serializer = SourceSerializer(source)
+
+        return Response(serializer.data)
+
+class DetailSource(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+        
+        try:
+            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        source = Source.objects.filter(owner_id=payload['id']).first()
+        serializer = SourceSerializer
+        serializer = SourceSerializer(source)
+
         return Response(serializer.data)

@@ -74,6 +74,14 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ] 
 
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.ScryptPasswordHasher',
+]
+
 CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ORIGIN_WHITELIST = ['http://localhost:3000', 'https://d1wne19icordtc.cloudfront.net']
 CORS_ALLOW_CREDENTIALS = True
