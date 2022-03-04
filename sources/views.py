@@ -1,13 +1,15 @@
 from .models import Source
 from .serializers import SourceSerializer
 from logging import raiseExceptions
-from urllib import response
+# from urllib import response
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
-from .serializers import SourceSerializer
-from .models import Source
+from django.shortcuts import get_list_or_404, get_object_or_404
+from django.http import Http404
+# from .serializers import SourceSerializer
+# from .models import Source
 import jwt, datetime
 from django.contrib.auth.hashers import make_password, check_password
 
@@ -24,6 +26,8 @@ class CreateSource(APIView):
             raise AuthenticationFailed('Unauthenticated!')
         
         serializer = SourceSerializer(data=request.data)
+        serializer.context['owner_id'] = payload['id']
+        print("Payload: " + str(payload['id']))
         # print(request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -43,13 +47,12 @@ class ListSource(APIView):
             raise AuthenticationFailed('Unauthenticated!')
 
         source = Source.objects.filter(owner_id=payload['id'])
-        # serializer = SourceSerializer
         serializer = SourceSerializer(source, many=True)
 
         return Response(serializer.data)
 
 class DetailSource(APIView):
-    def get(self, request):
+    def get(self, request, pk):
         token = request.COOKIES.get('jwt')
 
         if not token:
@@ -60,8 +63,15 @@ class DetailSource(APIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('Unauthenticated!')
 
-        source = Source.objects.filter(owner_id=payload['id']).first()
-        serializer = SourceSerializer
+        # source = Source.objects.filter(owner_id=payload['id']).first()
+        try:
+            source = Source.objects.filter(owner_id=payload['id']).get(pk=pk)
+            # source = get_object_or_404(Source, pk=pk)
+        except:
+            raise Http404
         serializer = SourceSerializer(source)
-
+        print(serializer.data)
         return Response(serializer.data)
+
+class DeleteSource(APIView):
+    pass
