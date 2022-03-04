@@ -24,6 +24,7 @@ class CreateSource(APIView):
             raise AuthenticationFailed('Unauthenticated!')
         
         serializer = SourceSerializer(data=request.data)
+        # print(request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         # serializer.set_password(serializer.password)
@@ -41,9 +42,9 @@ class ListSource(APIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('Unauthenticated!')
 
-        source = Source.objects.filter(owner_id=payload['id']).first()
-        serializer = SourceSerializer
-        serializer = SourceSerializer(source)
+        source = Source.objects.filter(owner_id=payload['id'])
+        # serializer = SourceSerializer
+        serializer = SourceSerializer(source, many=True)
 
         return Response(serializer.data)
 

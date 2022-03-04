@@ -7,12 +7,16 @@ class SourceSerializer(serializers.ModelSerializer):
         model = Source
         fields = '__all__'
         extra_kwargs = {
-            'password': {'write_only': False}
+            'password': {'write_only': True}
         }
     
     def create(self, validated_data):
-        # password = validated_data.pop('password', None)
-        password = make_password(validated_data.pop('password', None))
+        # password = make_password(validated_data.pop('password', None))
+        encrypt_pwd = make_password(validated_data['password'])
+        validated_data['password'] = encrypt_pwd
+        # print(encrypt_pwd)
+        # print(validated_data)
         instance = self.Meta.model(**validated_data)
+        # print(instance)
         instance.save()
         return instance
