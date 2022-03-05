@@ -5,11 +5,17 @@ from logging import raiseExceptions
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
+# from rest_framework.parsers import JSONParser
 from rest_framework.exceptions import AuthenticationFailed
-from django.shortcuts import get_list_or_404, get_object_or_404
+# from django.shortcuts import get_list_or_404, get_object_or_404
 from django.http import Http404
+# from django.http import JsonResponse
 import jwt, datetime
-from django.contrib.auth.hashers import make_password, check_password
+# from django.contrib.auth.hashers import make_password, check_password
+from rest_framework.decorators import api_view
+# from snippets.models import Snippet
+# from snippets.serializers import SnippetSerializer
+import json
 
 class CreateSource(APIView):
     def post(self, request):
@@ -67,4 +73,23 @@ class DetailSource(APIView):
         return Response(serializer.data)
 
 class DeleteSource(APIView):
-    pass
+    def get(self, request, pk):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+        
+        try:
+            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated!')
+
+        try:
+            if Source.objects.filter(pk=pk).exists():
+                print(Source.objects.filter(pk=pk).exists())
+                Source.objects.filter(owner_id=payload['id']).get(pk=pk).delete()
+            else:
+                raise Http404
+        except:
+            raise Http404
+        return Response({"detail": "Deleted"})
