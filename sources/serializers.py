@@ -3,6 +3,9 @@ from rest_framework import serializers
 from .models import Source
 from users.models import User
 from django.contrib.auth.hashers import make_password, check_password
+from cryptography.fernet import Fernet
+
+
 class SourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Source
@@ -12,18 +15,17 @@ class SourceSerializer(serializers.ModelSerializer):
         }
     
     def create(self, validated_data):
-        # password = make_password(validated_data.pop('password', None))
-        encrypt_pwd = make_password(validated_data['password'])
+        # encrypt_pwd = make_password(validated_data['password'])
+        key = Fernet.generate_key()
+        fernet = Fernet(key)
+        encrypt_pwd = fernet.encrypt(validated_data['password'].encode())
+        decrypt_pwd = fernet.decrypt(encrypt_pwd).decode()
+        # print("Plaintext: " + str(validated_data['password']))
+        # print("Encrypted: " + str(encrypt_pwd))
+        # print("Decrypted: " + str(decrypt_pwd))
         validated_data['password'] = encrypt_pwd
         owner_id = self.context["owner_id"]
         validated_data['owner'] = User.objects.get(id=owner_id)
-        # print("User:" + str(User.objects.get(id=owner_id)))
-        # validated_data['owner'] = owner_id
-        # print("S/P: " + str(owner_id))
-        # print("S: " + str(validated_data['owner']))
-        # print(encrypt_pwd)
-        print("Validated:" + str(validated_data))
         instance = self.Meta.model(**validated_data)
-        # print("Instance:" + str(instance))
         instance.save()
         return instance

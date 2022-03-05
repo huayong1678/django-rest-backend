@@ -8,8 +8,6 @@ from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
 from django.shortcuts import get_list_or_404, get_object_or_404
 from django.http import Http404
-# from .serializers import SourceSerializer
-# from .models import Source
 import jwt, datetime
 from django.contrib.auth.hashers import make_password, check_password
 
@@ -27,11 +25,8 @@ class CreateSource(APIView):
         
         serializer = SourceSerializer(data=request.data)
         serializer.context['owner_id'] = payload['id']
-        print("Payload: " + str(payload['id']))
-        # print(request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        # serializer.set_password(serializer.password)
         return Response(serializer.data)
 
 class ListSource(APIView):
@@ -63,10 +58,8 @@ class DetailSource(APIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('Unauthenticated!')
 
-        # source = Source.objects.filter(owner_id=payload['id']).first()
         try:
             source = Source.objects.filter(owner_id=payload['id']).get(pk=pk)
-            # source = get_object_or_404(Source, pk=pk)
         except:
             raise Http404
         serializer = SourceSerializer(source)
