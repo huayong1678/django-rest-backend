@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'users',
     'sources',
+    'dests',
     'django_s3_storage',
     'zappa_django_utils',
     # 'cryptography',
