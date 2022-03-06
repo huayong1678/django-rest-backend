@@ -11,19 +11,17 @@ class SourceSerializer(serializers.ModelSerializer):
         model = Source
         fields = ["id", "host", "name", "user", "port", "password"]
         extra_kwargs = {
-            'password': {'write_only': True}
+            # 'password': {'write_only': True},
         }
     
     def create(self, validated_data):
-        # encrypt_pwd = make_password(validated_data['password'])
-        key = Fernet.generate_key()
-        fernet = Fernet(key)
-        encrypt_pwd = fernet.encrypt(validated_data['password'].encode())
-        decrypt_pwd = fernet.decrypt(encrypt_pwd).decode()
-        # print("Plaintext: " + str(validated_data['password']))
-        # print("Encrypted: " + str(encrypt_pwd))
-        # print("Decrypted: " + str(decrypt_pwd))
-        validated_data['password'] = encrypt_pwd
+        # key = Fernet.generate_key()
+        # print(key)
+        # fernet = Fernet(key)
+        # encrypt_pwd = fernet.encrypt(validated_data['password'].encode())
+        # decrypt_pwd = fernet.decrypt(encrypt_pwd).decode()
+        # validated_data['hash_pwd'] = encrypt_pwd
+        # validated_data['hash_key'] = key
         owner_id = self.context["owner_id"]
         validated_data['owner'] = User.objects.get(id=owner_id)
         instance = self.Meta.model(**validated_data)

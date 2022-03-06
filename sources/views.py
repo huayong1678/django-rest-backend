@@ -16,6 +16,7 @@ from rest_framework.decorators import api_view
 # from snippets.models import Snippet
 # from snippets.serializers import SnippetSerializer
 import json
+from cryptography.fernet import Fernet
 
 class CreateSource(APIView):
     def post(self, request):
@@ -69,7 +70,15 @@ class DetailSource(APIView):
         except:
             raise Http404
         serializer = SourceSerializer(source)
-        print(serializer.data)
+        # key = Fernet.generate_key()
+        # print(key)
+        # fernet = Fernet(key)
+        # encrypt_pwd = fernet.encrypt(serializer.data['password'].encode())
+        # serializer.data.context['password'] = encrypt_pwd
+        # print(encrypt_pwd)
+        # decrypt_pwd = fernet.decrypt(encrypt_pwd).decode()
+        # validated_data['hash_pwd'] = encrypt_pwd
+        # validated_data['hash_key'] = key
         return Response(serializer.data)
 
 class DeleteSource(APIView):
@@ -93,3 +102,23 @@ class DeleteSource(APIView):
         except:
             raise Http404
         return Response({"detail": "Deleted"})
+
+class UpdateSource(APIView):
+    def post(self, request, pk):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+        
+        try:
+            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Unauthenticated!')
+        # qs = Source.objects.prefetch_related('tracks')
+        data = request.data
+        qs = Source.objects.filter(owner_id=payload['id']).filter(pk=pk).first()
+        serializer = SourceSerializer(qs, data=data)
+        serializer.context['owner_id'] = payload['id']
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

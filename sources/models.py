@@ -8,6 +8,8 @@ class Source(models.Model):
     user = models.CharField(max_length=255)
     port = models.IntegerField()
     password = models.CharField(max_length=255)
+    # hash_pwd = models.BinaryField()
+    # hash_key = models.BinaryField()
     owner = models.ForeignKey(
         'users.User',
         on_delete = models.CASCADE
