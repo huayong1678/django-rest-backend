@@ -9,7 +9,7 @@ from users.models import User
 class DestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dest
-        fields = ["id", "host", "name", "user", "port", "password"]
+        fields = ["id", "host", "tag", "user", "port", "password", "database", "tablename", "engine"]
         extra_kwargs = {
             # 'password': {'write_only': True},
         }

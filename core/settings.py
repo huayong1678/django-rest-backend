@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'users',
     'sources',
     'dests',
+    'schemas',
     'django_s3_storage',
     'zappa_django_utils',
     # 'cryptography',

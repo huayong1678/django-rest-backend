@@ -11,4 +11,8 @@ pytz
 aws-psycopg2
 zappa-django-utils
 bcrypt
-cryptography
+pandas
+sqlalchemy
+# cryptography
+# pyyaml
+# uritemplate
