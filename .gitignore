@@ -137,3 +137,4 @@ GitHub.sublime-settings
 .history
 
 migrations/
+zappa_settings.json
