@@ -11,4 +11,4 @@ zappa-django-utils
 bcrypt
 pandas
 sqlalchemy
-cryptography
+# cryptography

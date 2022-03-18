@@ -16,7 +16,7 @@ from rest_framework.decorators import api_view
 # from snippets.models import Snippet
 # from snippets.serializers import SnippetSerializer
 import json
-from cryptography.fernet import Fernet
+# from cryptography.fernet import Fernet
 
 class CreateSource(APIView):
     def post(self, request):
