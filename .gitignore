@@ -138,3 +138,7 @@ GitHub.sublime-settings
 
 migrations/
 zappa_settings.json
+env/
+venv/
+
+.DS_Store/

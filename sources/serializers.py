@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import Source
 from users.models import User
 from django.contrib.auth.hashers import make_password, check_password
-from cryptography.fernet import Fernet
+# from cryptography.fernet import Fernet
 
 
 class SourceSerializer(serializers.ModelSerializer):
