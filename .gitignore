@@ -142,3 +142,4 @@ env/
 venv/
 
 .DS_Store/
+*.sqlite3

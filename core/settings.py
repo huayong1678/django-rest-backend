@@ -13,14 +13,6 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 import os
 
-if 'SERVERTYPE' in os.environ and os.environ['SERVERTYPE'] == 'AWS Lambda':
-    import json
-    import os
-    json_data = open('zappa_settings.json')
-    env_vars = json.load(json_data)['dev']['environment_variables']
-    for key, val in env_vars.items():
-        os.environ[key] = val
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -55,7 +47,6 @@ INSTALLED_APPS = [
     'dests',
     'schemas',
     'django_s3_storage',
-    'zappa_django_utils',
 ]
 
 REST_FRAMEWORK = {
@@ -134,13 +125,13 @@ if 'RDS_HOSTNAME' in os.environ:
             'PORT': os.environ['RDS_PORT'],
         }
     }
-# else:
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.sqlite3',
-#             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#         }
-#     }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 # Custome User Model
 AUTH_USER_MODEL = 'users.User'
