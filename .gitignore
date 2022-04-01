@@ -137,3 +137,17 @@ GitHub.sublime-settings
 .history
 
 migrations/
+zappa_settings.json
+env/
+venv/
+
+.DS_Store
+.DS_Store/
+*/.DS_Store
+*.sqlite3
+
+.terraform/
+.terraform*
+terraform.*
+main-infra-with-rds
+main-infra-with-public-rds
