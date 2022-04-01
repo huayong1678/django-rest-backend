@@ -3,13 +3,13 @@ from rest_framework import serializers
 from .models import Source
 from users.models import User
 from django.contrib.auth.hashers import make_password, check_password
-from cryptography.fernet import Fernet
+# from cryptography.fernet import Fernet
 
 
 class SourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Source
-        fields = ["id", "host", "name", "user", "port", "password"]
+        fields = ["id", "host", "tag", "user", "port", "password", "database", "tablename", "engine"]
         extra_kwargs = {
             # 'password': {'write_only': True},
         }
