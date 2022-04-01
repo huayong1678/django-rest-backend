@@ -35,7 +35,10 @@ def showData(connection_data):
     connection_string = getEngine(connection_data)
     alchemyEngine   = create_engine(connection_string, pool_recycle=3600)
     dbConnection    = alchemyEngine.connect()
-    dataFrame       = pd.read_sql(f"select * from \"contacts\"", dbConnection)
+    # dataFrame       = pd.read_sql(f"select * from \"contacts\"", dbConnection)
+    # dataFrame       = pd.read_sql(f"select * from contacts", dbConnection)
+    sql_script = "select * from " + connection_data[-1]
+    dataFrame       = pd.read_sql(str(sql_script), dbConnection)
     pd.set_option('display.expand_frame_repr', False)
     if connection_data[-2] == True:
       df = sensitiveCensor(dataFrame)

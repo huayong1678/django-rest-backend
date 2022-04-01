@@ -1,6 +1,6 @@
-# resource "random_id" "id" {
-#   byte_length = 3
-# }
+resource "random_id" "id" {
+  byte_length = 3
+}
 
 resource "aws_s3_bucket" "glue_bucket" {
   bucket              = "etl-glue-bucket-${random_id.id.hex}"

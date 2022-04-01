@@ -12,7 +12,7 @@ import jwt
 import datetime
 from rest_framework.exceptions import AuthenticationFailed
 from django.http import Http404
-import psycopg2
+# import psycopg2
 # import pandas as pd
 # from sqlalchemy import create_engine
 from schemas.db_connection.dbConnection import *
@@ -197,6 +197,7 @@ class DestSchemaView(APIView):
             isSensitive = schema_serializer.data['isSensitive']
             connection_data = [db_engine, user, password,
                             host, database, isSensitive, table]
+            print(connection_data)
             connection = testConnection(connection_data)
             head = showData(connection_data)
             response = {"status": "Connection Success" if connection == True else "Connection Failed", "data": head}
@@ -226,17 +227,18 @@ class DBConnectionView(APIView):
             dest = Dest.objects.filter(owner_id=payload['id']).get(
                 pk=schema_serializer.data['dest'])
             dest_serializer = DestSerializer(dest)
-            database = source_serializer.data['database']
-            db_engine = source_serializer.data['engine']
-            user = source_serializer.data['user']
-            password = source_serializer.data['password']
-            host = source_serializer.data['host']
-            connection_data = [db_engine, user, password, host, database]
-            connection = testConnection(connection_data)
-            if connection == True:
-                status = "Connection Success."
-            else:
-                status = "Unable to connect."
+            source_database, dest_database = source_serializer.data['database'], dest_serializer.data['database']
+            source_db_engine, dest_db_engine = source_serializer.data['engine'], dest_serializer.data['engine']
+            source_user, dest_user = source_serializer.data['user'], dest_serializer.data['user']
+            source_password, dest_password = source_serializer.data['password'], dest_serializer.data['password']
+            source_host, dest_host = source_serializer.data['host'], dest_serializer.data['host']
+            source_connection_data = [source_db_engine, source_user, source_password, source_host, source_database]
+            dest_connection_data = [source_db_engine, source_user, source_password, source_host, source_database]
+            source_connection = testConnection(source_connection_data)
+            dest_connection = testConnection(dest_connection_data)
+            source_status = "Connection Success" if source_connection == True else "Unable to connect."
+            dest_status = "Connection Success" if dest_connection == True else "Unable to connect."
+            response = {"source": source_status, "dest": dest_status}
         except:
-            status = "Unable to connect."
-        return Response({"status": status})
+            response = "Unable to connect."
+        return Response(response)

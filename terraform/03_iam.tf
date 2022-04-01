@@ -72,8 +72,7 @@ resource "aws_iam_role_policy" "glue_s3_policy" {
         "s3:*"
       ],
       "Resource": [
-        "arn:aws:s3:::${aws_s3_bucket.glue_bucket.name}",
-        "arn:aws:s3:::${aws_s3_bucket.glue_bucket.name}/*"
+        "arn:aws:s3:::*"
       ]
     }
   ]

@@ -148,6 +148,6 @@ venv/
 
 .terraform/
 .terraform*
-terraform.*
-main-infra-with-rds
-main-infra-with-public-rds
+.terraform.lock*
+*.backup
+terraform/main-infra-with-public-rds

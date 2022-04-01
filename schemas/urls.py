@@ -8,6 +8,6 @@ urlpatterns = [
     path('delete/<int:pk>', DeleteSchemaView.as_view()),
     path('update/<int:pk>', UpdateSchemaView.as_view()),
     path('source/<int:pk>', SourceSchemaView.as_view()),
-    path('dest/<int:pk>', SourceSchemaView.as_view()),
+    path('dest/<int:pk>', DestSchemaView.as_view()),
     path('test/<int:pk>', DBConnectionView.as_view()),
 ]
