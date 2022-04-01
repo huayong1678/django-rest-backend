@@ -150,3 +150,4 @@ venv/
 .terraform*
 terraform.*
 main-infra-with-rds
+main-infra-with-public-rds
