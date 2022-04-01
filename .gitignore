@@ -143,6 +143,7 @@ venv/
 
 .DS_Store
 .DS_Store/
+*/.DS_Store
 *.sqlite3
 
 .terraform/
