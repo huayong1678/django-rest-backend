@@ -144,3 +144,8 @@ venv/
 .DS_Store
 .DS_Store/
 *.sqlite3
+
+.terraform/
+.terraform*
+terraform.*
+main-infra-with-rds

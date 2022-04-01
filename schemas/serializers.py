@@ -9,7 +9,7 @@ from dests.models import Dest
 class SchemaSerializer(serializers.ModelSerializer):
     class Meta:
         model = DatabaseSchema
-        fields = ["id", "tag", "dest", "source"]
+        fields = ["id", "tag", "dest", "source", "isSensitive"]
     
     def create(self, validated_data):
         owner_id = self.context["owner_id"]
