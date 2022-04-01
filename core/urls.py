@@ -21,8 +21,5 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('sources/', include('sources.urls')),
     path('dests/', include('dests.urls')),
-<<<<<<< HEAD
-=======
     path('schemas/', include('schemas.urls')),
->>>>>>> origin/main
 ]

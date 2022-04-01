@@ -45,10 +45,7 @@ INSTALLED_APPS = [
     'users',
     'sources',
     'dests',
-<<<<<<< HEAD
-=======
     'schemas',
->>>>>>> origin/main
     'django_s3_storage',
 ]
 
