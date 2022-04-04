@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'users',
     'sources',
     'dests',
-    'schemas',
+    'transforms',
+    'pipelines',
     'django_s3_storage',
 ]
 

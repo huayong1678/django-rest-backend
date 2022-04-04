@@ -1,14 +1,14 @@
 from http.client import responses
 from rest_framework import serializers
-from .models import DatabaseSchema
+from .models import Pipeline
 from users.models import User
 from sources.models import Source
 from dests.models import Dest
 
 
-class SchemaSerializer(serializers.ModelSerializer):
+class PipelineSerializer(serializers.ModelSerializer):
     class Meta:
-        model = DatabaseSchema
+        model = Pipeline
         fields = ["id", "tag", "dest", "source", "isSensitive"]
     
     def create(self, validated_data):

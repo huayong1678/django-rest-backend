@@ -1,44 +1,39 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import DatabaseSchema
+from .models import Pipeline
 from sources.models import Source
 from dests.models import Dest
-from .serializers import SchemaSerializer
+from .serializers import PipelineSerializer
 from sources.serializers import SourceSerializer
 from dests.serializers import DestSerializer
 from logging import raiseExceptions
-import jwt
-import datetime
+import jwt, datetime
 from rest_framework.exceptions import AuthenticationFailed
 from django.http import Http404
-# import psycopg2
-# import pandas as pd
-# from sqlalchemy import create_engine
-from schemas.db_connection.dbConnection import *
+from db_handler.dbConnect import *
+from db_handler.dbInfo import *
 
 # Methods Views
 
 
-class CreateSchemaView(APIView):
+class CreatePipelineView(APIView):
     def post(self, request):
         token = request.COOKIES.get('jwt')
-
         if not token:
             raise AuthenticationFailed('Unauthenticated!')
-
         try:
             payload = jwt.decode(token, 'secret', algorithm=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('Unauthenticated!')
-        serializer = SchemaSerializer(data=request.data)
+        serializer = PipelineSerializer(data=request.data)
         serializer.context['owner_id'] = payload['id']
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
 
-class ListSchemaView(APIView):
+class ListPipelineView(APIView):
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -50,13 +45,13 @@ class ListSchemaView(APIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('Unauthenticated!')
 
-        schema = DatabaseSchema.objects.filter(owner_id=payload['id'])
-        serializer = SchemaSerializer(schema, many=True)
+        pipeline = Pipeline.objects.filter(owner_id=payload['id'])
+        serializer = PipelineSerializer(pipeline, many=True)
 
         return Response(serializer.data)
 
 
-class DetailSchemaView(APIView):
+class DetailPipelineView(APIView):
     def get(self, request, pk):
         token = request.COOKIES.get('jwt')
 
@@ -69,18 +64,18 @@ class DetailSchemaView(APIView):
             raise AuthenticationFailed('Unauthenticated!')
 
         try:
-            schema = DatabaseSchema.objects.filter(
+            pipeline = Pipeline.objects.filter(
                 owner_id=payload['id']).get(pk=pk)
-            schema_serializer = SchemaSerializer(schema)
+            pipeline_serializer = PipelineSerializer(pipeline)
             source = Source.objects.filter(owner_id=payload['id']).get(
-                pk=schema_serializer.data['source'])
+                pk=pipeline_serializer.data['source'])
             source_serializer = SourceSerializer(source)
             dest = Dest.objects.filter(owner_id=payload['id']).get(
-                pk=schema_serializer.data['dest'])
+                pk=pipeline_serializer.data['dest'])
             dest_serializer = DestSerializer(dest)
-            data = {"schema_id": schema_serializer.data['id'],
-                    "schema_tag": schema_serializer.data['tag'],
-                    "isSensitive": schema_serializer.data['isSensitive'],
+            data = {"pipeline_id": pipeline_serializer.data['id'],
+                    "pipeline_tag": pipeline_serializer.data['tag'],
+                    "isSensitive": pipeline_serializer.data['isSensitive'],
                     "source": {"tag": source_serializer.data['tag'],
                                "host": source_serializer.data['host']},
                     "dest": {"tag": dest_serializer.data['tag'],
@@ -91,7 +86,7 @@ class DetailSchemaView(APIView):
         return Response(response)
 
 
-class DeleteSchemaView(APIView):
+class DeletePipelineView(APIView):
     def post(self, request, pk):
         token = request.COOKIES.get('jwt')
         if not token:
@@ -102,15 +97,15 @@ class DeleteSchemaView(APIView):
             raise AuthenticationFailed('Unauthenticated!')
         data = request.data
         try:
-          qs = DatabaseSchema.objects.filter(owner_id=payload['id']).filter(pk=pk).first()
-          qs.delete()
+          pipeline = Pipeline.objects.filter(owner_id=payload['id']).filter(pk=pk).first()
+          pipeline.delete()
           response = {"detail": "Object deleted."}
         except:
           response = {"detail": "No Object."}
         return Response(response)
 
 
-class UpdateSchemaView(APIView):
+class UpdatePipelineView(APIView):
     def post(self, request, pk):
         token = request.COOKIES.get('jwt')
 
@@ -122,18 +117,16 @@ class UpdateSchemaView(APIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('Unauthenticated!')
         data = request.data
-        qs = DatabaseSchema.objects.filter(
+        pipeline = Pipeline.objects.filter(
             owner_id=payload['id']).filter(pk=pk).first()
-        serializer = SchemaSerializer(qs, data=data)
+        serializer = PipelineSerializer(pipeline, data=data)
         serializer.context['owner_id'] = payload['id']
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
 # DB Handler
-
-
-class SourceSchemaView(APIView):
+class SourcePipelineView(APIView):
     def get(self, request, pk):
         token = request.COOKIES.get('jwt')
 
@@ -145,31 +138,31 @@ class SourceSchemaView(APIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('Unauthenticated!')
 
-        try:
-            schema = DatabaseSchema.objects.filter(
-                owner_id=payload['id']).get(pk=pk)
-            schema_serializer = SchemaSerializer(schema)
-            source = Source.objects.filter(owner_id=payload['id']).get(
-                pk=schema_serializer.data['source'])
-            source_serializer = SourceSerializer(source)
-            database = source_serializer.data['database']
-            db_engine = source_serializer.data['engine']
-            user = source_serializer.data['user']
-            password = source_serializer.data['password']
-            host = source_serializer.data['host']
-            table = source_serializer.data['tablename']
-            isSensitive = schema_serializer.data['isSensitive']
-            connection_data = [db_engine, user, password,
-                            host, database, isSensitive, table]
-            connection = testConnection(connection_data)
-            head = showData(connection_data)
-            response = {"status": "Connection Success" if connection == True else "Connection Failed", "data": head}
-        except:
-            response = {"status": "No object."}
+        # try:
+        pipeline = Pipeline.objects.filter(
+            owner_id=payload['id']).get(pk=pk)
+        pipeline_serializer = PipelineSerializer(pipeline)
+        source = Source.objects.filter(owner_id=payload['id']).get(
+            pk=pipeline_serializer.data['source'])
+        source_serializer = SourceSerializer(source)
+        database = source_serializer.data['database']
+        db_engine = source_serializer.data['engine']
+        user = source_serializer.data['user']
+        password = source_serializer.data['password']
+        host = source_serializer.data['host']
+        table = source_serializer.data['tablename']
+        isSensitive = pipeline_serializer.data['isSensitive']
+        connection_data = [db_engine, user, password,
+                        host, database, isSensitive, table]
+        connection = testConnection(connection_data)
+        head = showData(connection_data)
+        response = {"data" if connection == True else "error": head}
+        # except:
+        #     response = {"status": "No object."}
         return Response(response)
 
 
-class DestSchemaView(APIView):
+class DestPipelineView(APIView):
     def get(self, request, pk):
         token = request.COOKIES.get('jwt')
 
@@ -181,28 +174,27 @@ class DestSchemaView(APIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('Unauthenticated!')
 
-        try:
-            schema = DatabaseSchema.objects.filter(
-                owner_id=payload['id']).get(pk=pk)
-            schema_serializer = SchemaSerializer(schema)
-            dest = Dest.objects.filter(owner_id=payload['id']).get(
-                pk=schema_serializer.data['dest'])
-            dest_serializer = DestSerializer(dest)
-            database = dest_serializer.data['database']
-            db_engine = dest_serializer.data['engine']
-            user = dest_serializer.data['user']
-            password = dest_serializer.data['password']
-            host = dest_serializer.data['host']
-            table = dest_serializer.data['tablename']
-            isSensitive = schema_serializer.data['isSensitive']
-            connection_data = [db_engine, user, password,
-                            host, database, isSensitive, table]
-            print(connection_data)
-            connection = testConnection(connection_data)
-            head = showData(connection_data)
-            response = {"status": "Connection Success" if connection == True else "Connection Failed", "data": head}
-        except:
-            response = {"status": "No object."}
+        # try:
+        pipeline = Pipeline.objects.filter(
+            owner_id=payload['id']).get(pk=pk)
+        pipeline_serializer = PipelineSerializer(pipeline)
+        dest = Dest.objects.filter(owner_id=payload['id']).get(
+            pk=pipeline_serializer.data['dest'])
+        dest_serializer = DestSerializer(dest)
+        database = dest_serializer.data['database']
+        db_engine = dest_serializer.data['engine']
+        user = dest_serializer.data['user']
+        password = dest_serializer.data['password']
+        host = dest_serializer.data['host']
+        table = dest_serializer.data['tablename']
+        isSensitive = pipeline_serializer.data['isSensitive']
+        connection_data = [db_engine, user, password,
+                        host, database, isSensitive, table]
+        connection = testConnection(connection_data)
+        head = showData(connection_data)
+        response = {"data" if connection != True else "database_error": head}
+        # except:
+        #     response = {"status": "No object."}
         return Response(response)
 
 
@@ -218,14 +210,14 @@ class DBConnectionView(APIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('Unauthenticated!')
         try:
-            schema = DatabaseSchema.objects.filter(
+            pipeline = Pipeline.objects.filter(
                 owner_id=payload['id']).get(pk=pk)
-            schema_serializer = SchemaSerializer(schema)
+            pipeline_serializer = PipelineSerializer(pipeline)
             source = Source.objects.filter(owner_id=payload['id']).get(
-                pk=schema_serializer.data['source'])
+                pk=pipeline_serializer.data['source'])
             source_serializer = SourceSerializer(source)
             dest = Dest.objects.filter(owner_id=payload['id']).get(
-                pk=schema_serializer.data['dest'])
+                pk=pipeline_serializer.data['dest'])
             dest_serializer = DestSerializer(dest)
             source_database, dest_database = source_serializer.data['database'], dest_serializer.data['database']
             source_db_engine, dest_db_engine = source_serializer.data['engine'], dest_serializer.data['engine']
@@ -233,7 +225,7 @@ class DBConnectionView(APIView):
             source_password, dest_password = source_serializer.data['password'], dest_serializer.data['password']
             source_host, dest_host = source_serializer.data['host'], dest_serializer.data['host']
             source_connection_data = [source_db_engine, source_user, source_password, source_host, source_database]
-            dest_connection_data = [source_db_engine, source_user, source_password, source_host, source_database]
+            dest_connection_data = [dest_db_engine, dest_user, dest_password, dest_host, dest_database]
             source_connection = testConnection(source_connection_data)
             dest_connection = testConnection(dest_connection_data)
             source_status = "Connection Success" if source_connection == True else "Unable to connect."

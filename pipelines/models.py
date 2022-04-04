@@ -4,7 +4,7 @@ from sources.models import Source
 from dests.models import Dest
 
 
-class DatabaseSchema(models.Model):
+class Pipeline(models.Model):
     tag = models.CharField(max_length=255)
     dest = models.ForeignKey(
         'dests.Dest',

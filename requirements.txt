@@ -11,3 +11,4 @@ zappa-django-utils
 pandas
 numpy
 sqlalchemy
+shortuuid

@@ -70,15 +70,6 @@ class DetailSource(APIView):
         except:
             raise Http404
         serializer = SourceSerializer(source)
-        # key = Fernet.generate_key()
-        # print(key)
-        # fernet = Fernet(key)
-        # encrypt_pwd = fernet.encrypt(serializer.data['password'].encode())
-        # serializer.data.context['password'] = encrypt_pwd
-        # print(encrypt_pwd)
-        # decrypt_pwd = fernet.decrypt(encrypt_pwd).decode()
-        # validated_data['hash_pwd'] = encrypt_pwd
-        # validated_data['hash_key'] = key
         return Response(serializer.data)
 
 class DeleteSource(APIView):

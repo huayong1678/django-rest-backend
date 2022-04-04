@@ -7,7 +7,6 @@ from rest_framework.exceptions import AuthenticationFailed
 from .serializers import UserSerializer
 from .models import User
 import jwt, datetime
-from glue.test import *
 
 class RegisterView(APIView):
     def post(self, request):

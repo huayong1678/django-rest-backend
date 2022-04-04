@@ -21,5 +21,6 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('sources/', include('sources.urls')),
     path('dests/', include('dests.urls')),
-    path('schemas/', include('schemas.urls')),
+    path('pipelines/', include('pipelines.urls')),
+    path('transforms/', include('transforms.urls')),
 ]
