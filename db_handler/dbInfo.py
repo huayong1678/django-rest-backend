@@ -2,7 +2,7 @@ import sqlalchemy
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.exc import SQLAlchemyError
 import pandas as pd
-from db_handler.dbConnect import getEngine
+from db_handler.dbConnect import getEngine, sensitiveCensor
 
 def showData(connection_data):
   try:

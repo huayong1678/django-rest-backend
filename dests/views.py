@@ -8,19 +8,12 @@ from rest_framework.exceptions import AuthenticationFailed
 from django.http import Http404
 import jwt, datetime
 import json
+from jwt_authentication.jwtAuth import *
 
 class CreateDest(APIView):
     def post(self, request):
         token = request.COOKIES.get('jwt')
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated!')
-        
-        try:
-            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated!')
-        
+        payload = isAuthen(token)
         serializer = DestSerializer(data=request.data)
         serializer.context['owner_id'] = payload['id']
         serializer.is_valid(raise_exception=True)
@@ -30,15 +23,7 @@ class CreateDest(APIView):
 class ListDest(APIView):
     def get(self, request):
         token = request.COOKIES.get('jwt')
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated!')
-        
-        try:
-            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated!')
-
+        payload = isAuthen(token)
         dest = Dest.objects.filter(owner_id=payload['id'])
         serializer = DestSerializer(dest, many=True)
 
@@ -47,15 +32,7 @@ class ListDest(APIView):
 class DetailDest(APIView):
     def get(self, request, pk):
         token = request.COOKIES.get('jwt')
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated!')
-        
-        try:
-            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated!')
-
+        payload = isAuthen(token)
         try:
             dest = Dest.objects.filter(owner_id=payload['id']).get(pk=pk)
         except:
@@ -66,15 +43,7 @@ class DetailDest(APIView):
 class DeleteDest(APIView):
     def get(self, request, pk):
         token = request.COOKIES.get('jwt')
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated!')
-        
-        try:
-            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated!')
-
+        payload = isAuthen(token)
         try:
             if Dest.objects.filter(pk=pk).exists():
                 print(Dest.objects.filter(pk=pk).exists())
@@ -88,14 +57,7 @@ class DeleteDest(APIView):
 class UpdateDest(APIView):
     def post(self, request, pk):
         token = request.COOKIES.get('jwt')
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated!')
-        
-        try:
-            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated!')
+        payload = isAuthen(token)
         data = request.data
         qs = Dest.objects.filter(owner_id=payload['id']).filter(pk=pk).first()
         serializer = DestSerializer(qs, data=data)

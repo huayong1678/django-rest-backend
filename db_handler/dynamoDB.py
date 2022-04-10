@@ -37,26 +37,35 @@ def dynamoCreateTable(TABLE_NAME):
                 'AttributeName': 'UUID',
                 'KeyType': 'HASH'
             },
-            {
-                'AttributeName': 'OWNER_ID',
-                'KeyType': 'RANGE'
-            }
+            # {
+            #     'AttributeName': 'OWNER_ID',
+            #     'KeyType': 'RANGE'
+            # },
+            # {
+            #     'AttributeName': 'TAG',
+            #     'KeyType': 'RANGE'
+            # }
         ],
         AttributeDefinitions=[
-            {
-                'AttributeName': 'OWNER_ID',
-                'AttributeType': 'N'
-            },
+            # {
+            #     'AttributeName': 'OWNER_ID',
+            #     'AttributeType': 'N'
+            # },
             {
                 'AttributeName': 'UUID',
                 'AttributeType': 'S'
-            }
+            },
+            # {
+            #     'AttributeName': 'TAGS',
+            #     'AttributeType': 'SS'
+            # }
         ],
         ProvisionedThroughput={
             'ReadCapacityUnits': 1,
             'WriteCapacityUnits': 1
         }
     )
+    table.wait_until_exists()
     dynamoCheck()
 
 
@@ -64,21 +73,39 @@ def dynamoCreateTransform(data, payload):
     response = dynamoCheck()
     u = uuid.uuid4()
     s = shortuuid.encode(u)
-    # print(payload['id'], type(payload['id']))
-    # print(s, type(s))
+    TAGS, SCRIPTS = [], []
+    TAGS.append(data['tags'])
+    for item in data['scripts']:
+        SCRIPTS.append(item)
     OWNER_ID = str(payload['id'])
     try:
         response = dynamodb.put_item(
-            TableName = TABLE_NAME,
+            TableName=TABLE_NAME,
             Item={
                 'OWNER_ID': {'N': OWNER_ID},
-                'UUID': {'S': s}
+                'UUID': {'S': s},
+                'TAGS': {'SS': TAGS},
+                'SCRIPTS': {'SS': SCRIPTS},
+                # 'SCHEMAS': {'MM': }
             }
         )
-        return {"HTTPStatusCode": response['ResponseMetadata']['HTTPStatusCode']}
+        print(data)
+        return {"HTTPStatusCode": response['ResponseMetadata']['HTTPStatusCode'], "UUID": s}
     except ClientError as ce:
         # return ce.response
         return {ce.response['Error']['Code']: ce.response['Error']['Message']}
 
-def dynamoListTransform():
-    pass
+
+def dynamoGetTransform(data):
+    response = dynamoCheck()
+    # try:
+    dynamodb = boto3.resource(
+        'dynamodb', endpoint_url='http://localhost:8007', config=config)
+    table = dynamodb.Table(TABLE_NAME)
+    # print(data)
+    response = table.get_item(Key={'UUID': data['uuid'], 'OWNER_ID': data['owner']})
+    response['id'] = data['id']
+    return response
+    # except ClientError as ce:
+    #     # return ce.response
+    #     return {ce.response['Error']['Code']: ce.response['Error']['Message']}

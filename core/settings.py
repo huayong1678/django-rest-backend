@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'dests',
     'transforms',
     'pipelines',
+    'execute_function',
     'django_s3_storage',
 ]
 

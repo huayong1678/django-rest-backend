@@ -8,11 +8,14 @@ from .serializers import PipelineSerializer
 from sources.serializers import SourceSerializer
 from dests.serializers import DestSerializer
 from logging import raiseExceptions
-import jwt, datetime
+import jwt
+import datetime
 from rest_framework.exceptions import AuthenticationFailed
 from django.http import Http404
 from db_handler.dbConnect import *
 from db_handler.dbInfo import *
+from db_handler.dbTable import *
+from jwt_authentication.jwtAuth import *
 
 # Methods Views
 
@@ -20,12 +23,7 @@ from db_handler.dbInfo import *
 class CreatePipelineView(APIView):
     def post(self, request):
         token = request.COOKIES.get('jwt')
-        if not token:
-            raise AuthenticationFailed('Unauthenticated!')
-        try:
-            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated!')
+        payload = isAuthen(token)
         serializer = PipelineSerializer(data=request.data)
         serializer.context['owner_id'] = payload['id']
         serializer.is_valid(raise_exception=True)
@@ -36,33 +34,16 @@ class CreatePipelineView(APIView):
 class ListPipelineView(APIView):
     def get(self, request):
         token = request.COOKIES.get('jwt')
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated!')
-
-        try:
-            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated!')
-
+        payload = isAuthen(token)
         pipeline = Pipeline.objects.filter(owner_id=payload['id'])
         serializer = PipelineSerializer(pipeline, many=True)
-
         return Response(serializer.data)
 
 
 class DetailPipelineView(APIView):
     def get(self, request, pk):
         token = request.COOKIES.get('jwt')
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated!')
-
-        try:
-            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated!')
-
+        payload = isAuthen(token)
         try:
             pipeline = Pipeline.objects.filter(
                 owner_id=payload['id']).get(pk=pk)
@@ -89,33 +70,22 @@ class DetailPipelineView(APIView):
 class DeletePipelineView(APIView):
     def post(self, request, pk):
         token = request.COOKIES.get('jwt')
-        if not token:
-            raise AuthenticationFailed('Unauthenticated!')
-        try:
-            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated!')
+        payload = isAuthen(token)
         data = request.data
         try:
-          pipeline = Pipeline.objects.filter(owner_id=payload['id']).filter(pk=pk).first()
-          pipeline.delete()
-          response = {"detail": "Object deleted."}
+            pipeline = Pipeline.objects.filter(
+                owner_id=payload['id']).filter(pk=pk).first()
+            pipeline.delete()
+            response = {"detail": "Object deleted."}
         except:
-          response = {"detail": "No Object."}
+            response = {"detail": "No Object."}
         return Response(response)
 
 
 class UpdatePipelineView(APIView):
     def post(self, request, pk):
         token = request.COOKIES.get('jwt')
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated!')
-
-        try:
-            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated!')
+        payload = isAuthen(token)
         data = request.data
         pipeline = Pipeline.objects.filter(
             owner_id=payload['id']).filter(pk=pk).first()
@@ -126,19 +96,12 @@ class UpdatePipelineView(APIView):
         return Response(serializer.data)
 
 # DB Handler
+
+
 class SourcePipelineView(APIView):
     def get(self, request, pk):
         token = request.COOKIES.get('jwt')
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated!')
-
-        try:
-            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated!')
-
-        # try:
+        payload = isAuthen(token)
         pipeline = Pipeline.objects.filter(
             owner_id=payload['id']).get(pk=pk)
         pipeline_serializer = PipelineSerializer(pipeline)
@@ -153,28 +116,17 @@ class SourcePipelineView(APIView):
         table = source_serializer.data['tablename']
         isSensitive = pipeline_serializer.data['isSensitive']
         connection_data = [db_engine, user, password,
-                        host, database, isSensitive, table]
+                           host, database, isSensitive, table]
         connection = testConnection(connection_data)
         head = showData(connection_data)
         response = {"data" if connection == True else "error": head}
-        # except:
-        #     response = {"status": "No object."}
         return Response(response)
 
 
 class DestPipelineView(APIView):
     def get(self, request, pk):
         token = request.COOKIES.get('jwt')
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated!')
-
-        try:
-            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated!')
-
-        # try:
+        payload = isAuthen(token)
         pipeline = Pipeline.objects.filter(
             owner_id=payload['id']).get(pk=pk)
         pipeline_serializer = PipelineSerializer(pipeline)
@@ -189,26 +141,17 @@ class DestPipelineView(APIView):
         table = dest_serializer.data['tablename']
         isSensitive = pipeline_serializer.data['isSensitive']
         connection_data = [db_engine, user, password,
-                        host, database, isSensitive, table]
+                           host, database, isSensitive, table]
         connection = testConnection(connection_data)
         head = showData(connection_data)
         response = {"data" if connection != True else "database_error": head}
-        # except:
-        #     response = {"status": "No object."}
         return Response(response)
 
 
 class DBConnectionView(APIView):
     def get(self, request, pk):
         token = request.COOKIES.get('jwt')
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated!')
-
-        try:
-            payload = jwt.decode(token, 'secret', algorithm=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated!')
+        payload = isAuthen(token)
         try:
             pipeline = Pipeline.objects.filter(
                 owner_id=payload['id']).get(pk=pk)
@@ -219,13 +162,18 @@ class DBConnectionView(APIView):
             dest = Dest.objects.filter(owner_id=payload['id']).get(
                 pk=pipeline_serializer.data['dest'])
             dest_serializer = DestSerializer(dest)
-            source_database, dest_database = source_serializer.data['database'], dest_serializer.data['database']
-            source_db_engine, dest_db_engine = source_serializer.data['engine'], dest_serializer.data['engine']
+            source_database, dest_database = source_serializer.data[
+                'database'], dest_serializer.data['database']
+            source_db_engine, dest_db_engine = source_serializer.data[
+                'engine'], dest_serializer.data['engine']
             source_user, dest_user = source_serializer.data['user'], dest_serializer.data['user']
-            source_password, dest_password = source_serializer.data['password'], dest_serializer.data['password']
+            source_password, dest_password = source_serializer.data[
+                'password'], dest_serializer.data['password']
             source_host, dest_host = source_serializer.data['host'], dest_serializer.data['host']
-            source_connection_data = [source_db_engine, source_user, source_password, source_host, source_database]
-            dest_connection_data = [dest_db_engine, dest_user, dest_password, dest_host, dest_database]
+            source_connection_data = [
+                source_db_engine, source_user, source_password, source_host, source_database]
+            dest_connection_data = [
+                dest_db_engine, dest_user, dest_password, dest_host, dest_database]
             source_connection = testConnection(source_connection_data)
             dest_connection = testConnection(dest_connection_data)
             source_status = "Connection Success" if source_connection == True else "Unable to connect."
