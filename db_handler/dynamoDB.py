@@ -73,10 +73,19 @@ def dynamoCreateTransform(data, payload):
     response = dynamoCheck()
     u = uuid.uuid4()
     s = shortuuid.encode(u)
-    TAGS, SCRIPTS = [], []
+    TAGS, SCRIPTS, SCHEMAS = [], [], {}
     TAGS.append(data['tags'])
     for item in data['scripts']:
         SCRIPTS.append(item)
+    # for item in data['schemas'].items():
+    #     # SCHEMAS.append(item)
+    #     print(item)
+    # SCHEMAS = data['schemas']
+    # print(data['schemas'])
+    for k, v in data['schemas'].items():
+        # print(k, v)
+        SCHEMAS[k] = {'S': v}
+        # print(SCHEMAS)
     OWNER_ID = str(payload['id'])
     try:
         response = dynamodb.put_item(
@@ -86,26 +95,19 @@ def dynamoCreateTransform(data, payload):
                 'UUID': {'S': s},
                 'TAGS': {'SS': TAGS},
                 'SCRIPTS': {'SS': SCRIPTS},
-                # 'SCHEMAS': {'MM': }
+                'SCHEMAS': {'M': SCHEMAS}
             }
         )
-        print(data)
         return {"HTTPStatusCode": response['ResponseMetadata']['HTTPStatusCode'], "UUID": s}
     except ClientError as ce:
-        # return ce.response
         return {ce.response['Error']['Code']: ce.response['Error']['Message']}
 
 
 def dynamoGetTransform(data):
     response = dynamoCheck()
-    # try:
     dynamodb = boto3.resource(
         'dynamodb', endpoint_url='http://localhost:8007', config=config)
     table = dynamodb.Table(TABLE_NAME)
-    # print(data)
     response = table.get_item(Key={'UUID': data['uuid'], 'OWNER_ID': data['owner']})
     response['id'] = data['id']
     return response
-    # except ClientError as ce:
-    #     # return ce.response
-    #     return {ce.response['Error']['Code']: ce.response['Error']['Message']}

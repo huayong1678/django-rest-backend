@@ -49,7 +49,7 @@ class DeleteSource(APIView):
         payload = isAuthen(token)
         try:
             if Source.objects.filter(pk=pk).exists():
-                print(Source.objects.filter(pk=pk).exists())
+                # print(Source.objects.filter(pk=pk).exists())
                 Source.objects.filter(
                     owner_id=payload['id']).get(pk=pk).delete()
             else:

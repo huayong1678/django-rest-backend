@@ -46,7 +46,7 @@ class DeleteDest(APIView):
         payload = isAuthen(token)
         try:
             if Dest.objects.filter(pk=pk).exists():
-                print(Dest.objects.filter(pk=pk).exists())
+                # print(Dest.objects.filter(pk=pk).exists())
                 Dest.objects.filter(owner_id=payload['id']).get(pk=pk).delete()
             else:
                 raise Http404

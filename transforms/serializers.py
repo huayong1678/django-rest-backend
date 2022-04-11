@@ -19,6 +19,6 @@ class TransformSerializer(serializers.ModelSerializer):
         validated_data['uuid'] = uuid
         validated_data['owner'] = User.objects.get(id=owner_id)
         instance = self.Meta.model(**validated_data)
-        print(validated_data)
+        # print(validated_data)
         instance.save()
         return instance

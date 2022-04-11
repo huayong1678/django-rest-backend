@@ -1,6 +1,7 @@
 import sqlalchemy
 from sqlalchemy import create_engine, MetaData
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import *
+from sqlalchemy.orm.exc import NoResultFound
 import pandas as pd
 from db_handler.dbConnect import getEngine, sensitiveCensor
 
@@ -36,6 +37,5 @@ def getSchema(connection_data):
     dbConnection.close()
     pd.set_option('display.expand_frame_repr', False)
     return schema
-  except SQLAlchemyError as e:
-    error = str("sqlalchemy.exc.NoSuchTableError")
-    return error
+  except sqlalchemy.exc.SQLAlchemyError as e:
+    return str(e)
