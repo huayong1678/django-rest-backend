@@ -60,42 +60,37 @@ class ApplyTableView(APIView):
     def post(self, request, pipeline_pk, transform_pk):
         token = request.COOKIES.get('jwt')
         payload = isAuthen(token)
-        # try:
-        transform = Transform.objects.filter(
-            owner_id=payload['id']).get(pk=transform_pk)
-        transform_serializer = TransformSerializer(transform)
-        pipeline = Pipeline.objects.filter(
-            owner_id=payload['id']).get(pk=pipeline_pk)
-        pipeline_serializer = PipelineSerializer(pipeline)
-        dest = Dest.objects.filter(owner_id=payload['id']).get(
-            pk=pipeline_serializer.data['dest'])
-        dest_serializer = DestSerializer(dest)
-        database = dest_serializer.data['database']
-        db_engine = dest_serializer.data['engine']
-        user = dest_serializer.data['user']
-        password = dest_serializer.data['password']
-        host = dest_serializer.data['host']
-        table = dest_serializer.data['tablename']
-        isSensitive = pipeline_serializer.data['isSensitive']
-        connection_data = [db_engine, user, password,
-                            host, database, isSensitive, table]
-        dynamo_response = dynamoGetTransform(transform_serializer.data)
-            # try:
-        if request.data['create_table']:
-            # try:
-            # script = scriptGenerate(table, dynamo_response['Item']['SCHEMAS'])
-            create_status = createTable(connection_data,
-                        dynamo_response['Item']['SCHEMAS'], request.data['pk'])
-            table_status = checkTable(connection_data)
-            response = {"table_name": table, "schemas_to_apply": dynamo_response['Item']['SCHEMAS'], "transform_scripts": dynamo_response[
-                'Item']['SCRIPTS'], "detail": create_status}
-            # except:
-            #     response = {"detail": "table creation error"}
-        else:
-            response = {
-                "detail": "Execution Cancled. Any change will not apply."}
-        #     except:
-        #         response = {"detail": "\"create_table\" is required."}
-        # except:
-        #     raise Http404
+        try:
+            transform = Transform.objects.filter(
+                owner_id=payload['id']).get(pk=transform_pk)
+            transform_serializer = TransformSerializer(transform)
+            pipeline = Pipeline.objects.filter(
+                owner_id=payload['id']).get(pk=pipeline_pk)
+            pipeline_serializer = PipelineSerializer(pipeline)
+            dest = Dest.objects.filter(owner_id=payload['id']).get(
+                pk=pipeline_serializer.data['dest'])
+            dest_serializer = DestSerializer(dest)
+            database = dest_serializer.data['database']
+            db_engine = dest_serializer.data['engine']
+            user = dest_serializer.data['user']
+            password = dest_serializer.data['password']
+            host = dest_serializer.data['host']
+            table = dest_serializer.data['tablename']
+            isSensitive = pipeline_serializer.data['isSensitive']
+            connection_data = [db_engine, user, password,
+                                host, database, isSensitive, table]
+            dynamo_response = dynamoGetTransform(transform_serializer.data)
+            if request.data['create_table']:
+                create_status = createTable(connection_data,
+                            dynamo_response['Item']['SCHEMAS'], request.data['pk'])
+                table_status = checkTable(connection_data)
+                response = {"table_name": table, "schemas_to_apply": dynamo_response['Item']['SCHEMAS'], "transform_scripts": dynamo_response[
+                    'Item']['SCRIPTS'], "detail": create_status}
+            else:
+                response = {
+                    "detail": "Execution Cancled. Any change will not apply."}
+        except:
+            pass
         return Response(response)
+
+

@@ -9,5 +9,5 @@ urlpatterns = [
     path('update/<int:pk>', UpdatePipelineView.as_view()),
     path('source/<int:pk>', SourcePipelineView.as_view()),
     path('dest/<int:pk>', DestPipelineView.as_view()),
-    path('test/<int:pk>', DBConnectionView.as_view()),
+    path('connection/<int:pk>', DBConnectionView.as_view()),
 ]
