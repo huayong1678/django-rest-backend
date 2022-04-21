@@ -151,3 +151,6 @@ venv/
 .terraform.lock*
 *.backup
 terraform/main-infra-with-public-rds
+s3-s-d
+tmp/
+tmp/*

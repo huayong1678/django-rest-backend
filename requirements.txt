@@ -2,7 +2,9 @@ Django
 django-cors-headers
 django-s3-storage
 djangorestframework
-aws-psycopg2
+# aws-psycopg2
+psycopg2-binary
+progressbar2
 boto3
 djangorestframework-jwt
 PyJWT==1.7.1
@@ -12,3 +14,4 @@ pandas
 numpy
 sqlalchemy
 shortuuid
+psutil

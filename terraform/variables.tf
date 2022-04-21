@@ -63,18 +63,34 @@ variable "rds_spec" {
   }
 }
 
-variable "rds_db_name" {
-  description = "DB_NAME *SENSITIVE*"
+variable "rds_db_name_source" {
+  description = "Source => DB_NAME *SENSITIVE*"
   type        = string
   sensitive   = true
 }
-variable "rds_username" {
-  description = "USERNAME *SENSITIVE*"
+variable "rds_username_source" {
+  description = "Source => USERNAME *SENSITIVE*"
   type        = string
   sensitive   = true
 }
-variable "rds_password" {
-  description = "PASSWORD *SENSITIVE*"
+variable "rds_password_source" {
+  description = "Source => PASSWORD *SENSITIVE*"
+  type        = string
+  sensitive   = true
+}
+
+variable "rds_db_name_dest" {
+  description = "Destination => DB_NAME *SENSITIVE*"
+  type        = string
+  sensitive   = true
+}
+variable "rds_username_dest" {
+  description = "Destination => USERNAME *SENSITIVE*"
+  type        = string
+  sensitive   = true
+}
+variable "rds_password_dest" {
+  description = "Destination => PASSWORD *SENSITIVE*"
   type        = string
   sensitive   = true
 }

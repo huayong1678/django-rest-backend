@@ -10,12 +10,15 @@ from db_handler.dynamoDB import *
 from jwt_authentication.jwtAuth import *
 from db_handler.dynamoDB import *
 from db_handler.dbTable import *
+from database_migration.dms import *
 from transforms.serializers import TransformSerializer
 from transforms.models import Transform
 from pipelines.serializers import PipelineSerializer
 from pipelines.models import Pipeline
 from dests.serializers import DestSerializer
 from dests.models import Dest
+from sources.serializers import SourceSerializer
+from sources.models import Source
 
 
 class PrepareTableView(APIView):
@@ -78,11 +81,11 @@ class ApplyTableView(APIView):
             table = dest_serializer.data['tablename']
             isSensitive = pipeline_serializer.data['isSensitive']
             connection_data = [db_engine, user, password,
-                                host, database, isSensitive, table]
+                               host, database, isSensitive, table]
             dynamo_response = dynamoGetTransform(transform_serializer.data)
             if request.data['create_table']:
                 create_status = createTable(connection_data,
-                            dynamo_response['Item']['SCHEMAS'], request.data['pk'])
+                                            dynamo_response['Item']['SCHEMAS'], request.data['pk'])
                 table_status = checkTable(connection_data)
                 response = {"table_name": table, "schemas_to_apply": dynamo_response['Item']['SCHEMAS'], "transform_scripts": dynamo_response[
                     'Item']['SCRIPTS'], "detail": create_status}
@@ -94,3 +97,24 @@ class ApplyTableView(APIView):
         return Response(response)
 
 
+class ApplyMigrateView(APIView):
+    def get(self, request, pipeline_pk, transform_pk):
+        token = request.COOKIES.get('jwt')
+        payload = isAuthen(token)
+        pipeline = Pipeline.objects.filter(
+            owner_id=payload['id']).get(pk=pipeline_pk)
+        pipeline_serializer = PipelineSerializer(pipeline)
+        source = Source.objects.filter(owner_id=payload['id']).get(
+            pk=pipeline_serializer.data['source'])
+        source_serializer = SourceSerializer(source)
+        database = source_serializer.data['database']
+        db_engine = source_serializer.data['engine']
+        user = source_serializer.data['user']
+        password = source_serializer.data['password']
+        host = source_serializer.data['host']
+        table = source_serializer.data['tablename']
+        port = source_serializer.data['port']
+        connection_data = [db_engine, user, password,
+                           host, port, database, table]
+        dumpDatabase(connection_data, payload['id'])
+        return Response(connection_data)

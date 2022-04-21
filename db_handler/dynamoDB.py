@@ -75,8 +75,11 @@ def dynamoCreateTransform(data, payload):
     s = shortuuid.encode(u)
     TAGS, SCRIPTS, SCHEMAS = [], [], {}
     TAGS.append(data['tags'])
-    for item in data['scripts']:
-        SCRIPTS.append(item)
+    if len(data['scripts']) != 0:
+        for item in data['scripts']:
+            SCRIPTS.append(item)
+    else:
+        SCRIPTS = [""]
     # for item in data['schemas'].items():
     #     # SCHEMAS.append(item)
     #     print(item)
