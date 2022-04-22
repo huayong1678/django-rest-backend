@@ -27,39 +27,6 @@ import psutil
 
 AWS_BUCKET_NAME = 'etl-dump-bucket-df12f0'
 
-
-def prepareLogTable():
-    dynamo_config = Config(
-        connect_timeout=3, read_timeout=3, retries={'max_attempts': 3})
-    dynamodb_client = boto3.client(
-        'dynamodb', endpoint_url='http://localhost:8007', config=dynamo_config)
-    existing_tables = dynamodb_client.list_tables()['TableNames']
-    # print(existing_tables)
-    try:
-        table = dynamodb_client.create_table(
-            TableName='MigrationLogs',
-            KeySchema=[
-                {
-                    'AttributeName': 'MID',
-                    'KeyType': 'HASH'
-                }
-            ],
-            AttributeDefinitions=[
-                {
-                    'AttributeName': 'MID',
-                    'AttributeType': 'S'
-                }
-            ],
-            ProvisionedThroughput={
-                'ReadCapacityUnits': 1,
-                'WriteCapacityUnits': 1
-            }
-        )
-        table.wait_until_exists()
-    except ClientError as ce:
-        print(ce.response)
-
-
 def dumpDatabase(connection_data, owner_id):
     start = time.time()
     AWS_BUCKET_PATH = f'{owner_id}/'

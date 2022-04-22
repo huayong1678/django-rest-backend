@@ -21,7 +21,8 @@ def dynamoCheck():
         print(ce.response)
         if ce.response['Error']['Code'] == 'ResourceNotFoundException':
             # print("Table " + TABLE_NAME + " does not exist. Create the table first and try again.")
-            dynamoCreateTable(TABLE_NAME)
+            dynamoTransformTable()
+            dynamoLogTable()
             return dynamoCheck()
         else:
             # print("Unknown exception occurred while querying for the " + TABLE_NAME + " table. Printing full error:")
@@ -29,36 +30,20 @@ def dynamoCheck():
             return ce.response['Error']['Code']
 
 
-def dynamoCreateTable(TABLE_NAME):
+def dynamoTransformsTable():
     table = dynamodb.create_table(
-        TableName=TABLE_NAME,
+        TableName="Transforms",
         KeySchema=[
             {
                 'AttributeName': 'UUID',
                 'KeyType': 'HASH'
             },
-            # {
-            #     'AttributeName': 'OWNER_ID',
-            #     'KeyType': 'RANGE'
-            # },
-            # {
-            #     'AttributeName': 'TAG',
-            #     'KeyType': 'RANGE'
-            # }
         ],
         AttributeDefinitions=[
-            # {
-            #     'AttributeName': 'OWNER_ID',
-            #     'AttributeType': 'N'
-            # },
             {
                 'AttributeName': 'UUID',
                 'AttributeType': 'S'
             },
-            # {
-            #     'AttributeName': 'TAGS',
-            #     'AttributeType': 'SS'
-            # }
         ],
         ProvisionedThroughput={
             'ReadCapacityUnits': 1,
@@ -67,6 +52,37 @@ def dynamoCreateTable(TABLE_NAME):
     )
     table.wait_until_exists()
     dynamoCheck()
+
+def dynamoLogTable():
+    dynamo_config = Config(
+        connect_timeout=3, read_timeout=3, retries={'max_attempts': 3})
+    dynamodb_client = boto3.client(
+        'dynamodb', endpoint_url='http://localhost:8007', config=dynamo_config)
+    existing_tables = dynamodb_client.list_tables()['TableNames']
+    # print(existing_tables)
+    try:
+        table = dynamodb_client.create_table(
+            TableName='MigrationLogs',
+            KeySchema=[
+                {
+                    'AttributeName': 'MID',
+                    'KeyType': 'HASH'
+                }
+            ],
+            AttributeDefinitions=[
+                {
+                    'AttributeName': 'MID',
+                    'AttributeType': 'S'
+                }
+            ],
+            ProvisionedThroughput={
+                'ReadCapacityUnits': 1,
+                'WriteCapacityUnits': 1
+            }
+        )
+        table.wait_until_exists()
+    except ClientError as ce:
+        print(ce.response)
 
 
 def dynamoCreateTransform(data, payload):
@@ -97,7 +113,7 @@ def dynamoCreateTransform(data, payload):
                 'OWNER_ID': {'N': OWNER_ID},
                 'UUID': {'S': s},
                 'TAGS': {'SS': TAGS},
-                'SCRIPTS': {'SS': SCRIPTS},
+                # 'SCRIPTS': {'SS': SCRIPTS},
                 'SCHEMAS': {'M': SCHEMAS}
             }
         )
