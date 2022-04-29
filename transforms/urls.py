@@ -7,4 +7,5 @@ urlpatterns = [
     path('list', ListTransformView.as_view()),
     path('<int:pk>', GetTransformView.as_view()),
     path('delete/<int:pk>', DeleteTransformView.as_view()),
+    path('update/<int:pk>', UpdateTransformView.as_view()),
 ]

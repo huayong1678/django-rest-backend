@@ -53,6 +53,7 @@ def dynamoTransformsTable():
     table.wait_until_exists()
     dynamoCheck()
 
+
 def dynamoLogTable():
     dynamo_config = Config(
         connect_timeout=3, read_timeout=3, retries={'max_attempts': 3})
@@ -89,7 +90,7 @@ def dynamoCreateTransform(data, payload):
     response = dynamoCheck()
     u = uuid.uuid4()
     s = shortuuid.encode(u)
-    TAGS, SCRIPTS, SCHEMAS = [], [], {}
+    TAGS, SCRIPTS, SCHEMAS, pk = [], [], {}, data['pk']
     TAGS.append(data['tags'])
     if len(data['scripts']) != 0:
         for item in data['scripts']:
@@ -114,7 +115,8 @@ def dynamoCreateTransform(data, payload):
                 'UUID': {'S': s},
                 'TAGS': {'SS': TAGS},
                 # 'SCRIPTS': {'SS': SCRIPTS},
-                'SCHEMAS': {'M': SCHEMAS}
+                'SCHEMAS': {'M': SCHEMAS},
+                'PK': {'S': pk},
             }
         )
         return {"HTTPStatusCode": response['ResponseMetadata']['HTTPStatusCode'], "UUID": s}
@@ -127,6 +129,44 @@ def dynamoGetTransform(data):
     dynamodb = boto3.resource(
         'dynamodb', endpoint_url='http://localhost:8007', config=config)
     table = dynamodb.Table(TABLE_NAME)
-    response = table.get_item(Key={'UUID': data['uuid'], 'OWNER_ID': data['owner']})
+    response = table.get_item(
+        Key={'UUID': data['uuid'], 'OWNER_ID': data['owner']})
     response['id'] = data['id']
     return response
+
+
+def dynamoUpdateTransform(data, payload, uuid, id):
+    response = dynamoCheck()
+    # u = uuid.uuid4()
+    # s = shortuuid.encode(u)
+    TAGS, SCRIPTS, SCHEMAS = [], [], {}
+    TAGS.append(data['tags'])
+    if len(data['scripts']) != 0:
+        for item in data['scripts']:
+            SCRIPTS.append(item)
+    else:
+        SCRIPTS = [""]
+    for k, v in data['schemas'].items():
+        SCHEMAS[k] = {'S': v}
+    OWNER_ID = str(payload['id'])
+    try:
+        dynamodb = boto3.resource(
+            'dynamodb', endpoint_url='http://localhost:8007', config=config)
+        table = dynamodb.Table('Transforms')
+        table.update_item(
+            Key={
+                'UUID': str(uuid),
+                'OWNER_ID': payload['id']
+            },
+            UpdateExpression="SET TAGS=:val1, SCHEMAS=:val2, PK=:val3",
+            ExpressionAttributeValues={
+                ':val1': TAGS,
+                ':val2': SCHEMAS,
+                ':val3': PK,
+            },
+        )
+        data = {'uuid': uuid, 'owner': payload['id'], 'id': id}
+        response = dynamoGetTransform(data)
+        return response
+    except ClientError as ce:
+        return {ce.response['Error']['Code']: ce.response['Error']['Message']}

@@ -68,3 +68,16 @@ class GetTransformView(APIView):
         serializer = TransformSerializer(transform)
         response = dynamoGetTransform(serializer.data)
         return Response(response)
+
+class UpdateTransformView(APIView):
+    def post(self, request, pk):
+        token = request.COOKIES.get('jwt')
+        payload = isAuthen(token)
+        try:
+            transform = Transform.objects.filter(owner_id=payload['id']).get(pk=pk)
+            serializer = TransformSerializer(transform)
+        except:
+            raise Http404
+        response = dynamoUpdateTransform(request.data, payload, serializer.data['uuid'], serializer.data['id'])
+        return Response(response)
+        # return Response({"HTTPStatusCode": response['HTTPStatusCode'], "uuid": response['UUID']})

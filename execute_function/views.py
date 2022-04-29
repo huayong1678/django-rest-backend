@@ -19,6 +19,7 @@ from dests.serializers import DestSerializer
 from dests.models import Dest
 from sources.serializers import SourceSerializer
 from sources.models import Source
+from django.http import HttpResponseServerError
 
 
 class PrepareTableView(APIView):
@@ -49,10 +50,10 @@ class PrepareTableView(APIView):
             head = showData(connection_data)
         except:
             raise Http404
-        # head = {"schema" if schema !=
-        #             table else "database_error": schema, "head": head}
+        # transform_data = {
+        #     "schemas": dynamo_response['Item']['SCHEMAS'], "scripts": dynamo_response['Item']['SCRIPTS']}
         transform_data = {
-            "schemas": dynamo_response['Item']['SCHEMAS'], "scripts": dynamo_response['Item']['SCRIPTS']}
+            "schemas": dynamo_response['Item']['SCHEMAS']}
         dest_data = {"schemas": schema if schema != table else "unavailable"}
         response = {"detail": "available" if checkTable(connection_data) else "no such table", "table_schema" if schema !=
                     table else "required_table": schema, "transform_data": transform_data, "dest_data": dest_data}
@@ -82,18 +83,20 @@ class ApplyTableView(APIView):
             isSensitive = pipeline_serializer.data['isSensitive']
             connection_data = [db_engine, user, password,
                                host, database, isSensitive, table]
-            dynamo_response = dynamoGetTransform(transform_serializer.data)
-            if request.data['create_table']:
-                create_status = createTable(connection_data,
-                                            dynamo_response['Item']['SCHEMAS'], request.data['pk'])
-                table_status = checkTable(connection_data)
-                response = {"table_name": table, "schemas_to_apply": dynamo_response['Item']['SCHEMAS'], "transform_scripts": dynamo_response[
-                    'Item']['SCRIPTS'], "detail": create_status}
-            else:
-                response = {
-                    "detail": "Execution Cancled. Any change will not apply."}
+            try:
+                dynamo_response = dynamoGetTransform(transform_serializer.data)
+                if request.data['create_table']:
+                    create_status = createTable(connection_data,
+                                                dynamo_response['Item']['SCHEMAS'], request.data['pk'])
+                    table_status = checkTable(connection_data)
+                    response = {"table_name": table, "schemas_to_apply": dynamo_response['Item']['SCHEMAS'], "detail": create_status}
+                else:
+                    response = {
+                        "detail": "Execution Cancled. Any change will not apply."}
+            except:
+                return HttpResponseServerError()
         except:
-            pass
+            raise Http404
         return Response(response)
 
 
@@ -101,20 +104,32 @@ class ApplyMigrateView(APIView):
     def get(self, request, pipeline_pk, transform_pk):
         token = request.COOKIES.get('jwt')
         payload = isAuthen(token)
-        pipeline = Pipeline.objects.filter(
-            owner_id=payload['id']).get(pk=pipeline_pk)
-        pipeline_serializer = PipelineSerializer(pipeline)
-        source = Source.objects.filter(owner_id=payload['id']).get(
-            pk=pipeline_serializer.data['source'])
-        source_serializer = SourceSerializer(source)
-        database = source_serializer.data['database']
-        db_engine = source_serializer.data['engine']
-        user = source_serializer.data['user']
-        password = source_serializer.data['password']
-        host = source_serializer.data['host']
-        table = source_serializer.data['tablename']
-        port = source_serializer.data['port']
-        connection_data = [db_engine, user, password,
-                           host, port, database, table]
-        dumpDatabase(connection_data, payload['id'])
-        return Response(connection_data)
+        try:
+            pipeline = Pipeline.objects.filter(
+                owner_id=payload['id']).get(pk=pipeline_pk)
+            pipeline_serializer = PipelineSerializer(pipeline)
+            source = Source.objects.filter(owner_id=payload['id']).get(
+                pk=pipeline_serializer.data['source'])
+            source_serializer = SourceSerializer(source)
+            transform = Transform.objects.filter(
+                owner_id=payload['id']).get(pk=transform_pk)
+            transform_serializer = TransformSerializer(transform)
+            database = source_serializer.data['database']
+            db_engine = source_serializer.data['engine']
+            user = source_serializer.data['user']
+            password = source_serializer.data['password']
+            host = source_serializer.data['host']
+            table = source_serializer.data['tablename']
+            port = source_serializer.data['port']
+            connection_data = [db_engine, user, password,
+                            host, port, database, table]
+            try:
+                response = dynamoGetTransform(transform_serializer.data)
+                tmp = exportData(connection_data, payload['id'], response)
+                importData(tmp, response)
+                removeLocalData(tmp[1])
+            except:
+                return HttpResponseServerError()
+        except:
+            raise Http404
+        return Response(response['Item'])
