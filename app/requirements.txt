@@ -1,4 +1,5 @@
 Django
+gunicorn
 django-cors-headers
 django-s3-storage
 djangorestframework

@@ -14,30 +14,6 @@
         "logs:*"
       ],
       "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-          "ssmmessages:CreateControlChannel",
-          "ssmmessages:CreateDataChannel",
-          "ssmmessages:OpenControlChannel",
-          "ssmmessages:OpenDataChannel"
-      ],
-      "Resource": "*"
-  },
-  {
-      "Effect": "Allow",
-      "Action": [
-          "s3:GetEncryptionConfiguration"
-      ],
-      "Resource": "*"
-  },
-  {
-      "Effect": "Allow",
-      "Action": [
-          "kms:Decrypt"
-      ],
-      "Resource": "*"
-  }
+    }
   ]
 }

@@ -29,7 +29,7 @@ DEBUG = True
 
 # Backend Address
 # ALLOWED_HOSTS = ['tp4y0cq38c.execute-api.us-east-1.amazonaws.com', 'localhost:8000']
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split()
 
 # Application definition
 
@@ -70,6 +70,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    'core.middleware.HealthCheckMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -116,7 +117,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-if 'RDS_HOSTNAME' in os.environ:
+if 'RDS_DB_NAME' in os.environ:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -178,22 +179,26 @@ USE_TZ = True
 #     os.path.join(BASE_DIR, 'static')
 # ]
 
+STATIC_URL = '/staticfiles/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 # STATICFILES_STORAGE = 'core.storage.StaticStorage'
 
-AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-AWS_REGION = 'us-east-1'
-AWS_S3_SIGNATURE_VERSION = 's3v4'
+# AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+# AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+# AWS_REGION = 'us-east-1'
+# AWS_S3_SIGNATURE_VERSION = 's3v4'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-AWS_S3_BUCKET_NAME = "etl-static"
-AWS_S3_BUCKET_NAME_STATIC = AWS_S3_BUCKET_NAME
-AWS_S3_ADDRESSING_STYLE = "auto"
-STATICFILES_STORAGE = "django_s3_storage.storage.StaticS3Storage"
-DEFAULT_FILE_STORAGE = "django_s3_storage.storage.S3Storage"
-STATICFILES_LOCATION = 'static'
+# AWS_S3_BUCKET_NAME = "etl-static"
+# AWS_S3_BUCKET_NAME_STATIC = AWS_S3_BUCKET_NAME
+# AWS_S3_ADDRESSING_STYLE = "auto"
+# STATICFILES_STORAGE = "django_s3_storage.storage.StaticS3Storage"
+# DEFAULT_FILE_STORAGE = "django_s3_storage.storage.S3Storage"
+# STATICFILES_LOCATION = 'static'
 
-# to serve the static files from your s3 bucket
-AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_S3_BUCKET_NAME
-STATIC_URL = "https://%s/" % AWS_S3_CUSTOM_DOMAIN
+# # to serve the static files from your s3 bucket
+# AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_S3_BUCKET_NAME
+# STATIC_URL = "https://%s/" % AWS_S3_CUSTOM_DOMAIN
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
