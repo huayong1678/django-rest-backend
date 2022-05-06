@@ -7,4 +7,7 @@ resource "aws_instance" "BASTION" {
   tags = {
     Name = "bastionhost"
   }
+  lifecycle {
+    ignore_changes = all
+  }
 }

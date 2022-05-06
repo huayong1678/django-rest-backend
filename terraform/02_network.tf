@@ -10,13 +10,13 @@ resource "aws_subnet" "public-subnet-1" {
   cidr_block        = var.public_subnet_1_cidr
   vpc_id            = aws_vpc.production-vpc.id
   availability_zone = var.availability_zones[0]
-  map_public_ip_on_launch = false
+  map_public_ip_on_launch = true
 }
 resource "aws_subnet" "public-subnet-2" {
   cidr_block        = var.public_subnet_2_cidr
   vpc_id            = aws_vpc.production-vpc.id
   availability_zone = var.availability_zones[1]
-  map_public_ip_on_launch = false
+  map_public_ip_on_launch = true
 }
 
 # Private subnets
