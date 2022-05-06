@@ -34,9 +34,9 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions = data.template_file.app.rendered
   depends_on            = [aws_db_instance.production]
 
-  lifecycle {
-    create_before_destroy = true
-  }
+  # lifecycle {
+  #   create_before_destroy = true
+  # }
 
   volume {
     name      = "static_volume"
@@ -51,7 +51,7 @@ resource "aws_ecs_service" "production" {
   iam_role        = aws_iam_role.ecs-service-role.arn
   desired_count   = var.app_count
   depends_on      = [aws_alb_listener.ecs-alb-http-listener, aws_iam_role_policy.ecs-service-role-policy]
-
+  force_new_deployment = true
   load_balancer {
     target_group_arn = aws_alb_target_group.default-target-group.arn
     container_name   = "nginx"

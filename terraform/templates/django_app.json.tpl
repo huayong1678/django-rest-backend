@@ -38,6 +38,10 @@
       {
         "name": "ALLOWED_HOSTS",
         "value": "${allowed_hosts}"
+      },
+      {
+        "name": "AWS_DEFAULT_REGION",
+        "value": "${region}"
       }
     ],
     "mountPoints": [
