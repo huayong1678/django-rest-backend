@@ -114,9 +114,10 @@ class SourcePipelineView(APIView):
         password = source_serializer.data['password']
         host = source_serializer.data['host']
         table = source_serializer.data['tablename']
+        port = source_serializer.data['port']
         isSensitive = pipeline_serializer.data['isSensitive']
         connection_data = [db_engine, user, password,
-                           host, database, isSensitive, table]
+                           host, database, isSensitive, table, port]
         connection = testConnection(connection_data)
         head = showData(connection_data)
         response = {"data" if connection == True else "error": head}
@@ -139,9 +140,10 @@ class DestPipelineView(APIView):
         password = dest_serializer.data['password']
         host = dest_serializer.data['host']
         table = dest_serializer.data['tablename']
+        port = dest_serializer.data['port']
         isSensitive = pipeline_serializer.data['isSensitive']
         connection_data = [db_engine, user, password,
-                           host, database, isSensitive, table]
+                           host, database, isSensitive, table, port]
         connection = testConnection(connection_data)
         head = showData(connection_data)
         response = {"data" if connection != True else "database_error": head}

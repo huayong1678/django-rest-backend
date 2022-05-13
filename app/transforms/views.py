@@ -81,3 +81,16 @@ class UpdateTransformView(APIView):
         response = dynamoUpdateTransform(request.data, payload, serializer.data['uuid'], serializer.data['id'])
         return Response(response)
         # return Response({"HTTPStatusCode": response['HTTPStatusCode'], "uuid": response['UUID']})
+    # def post(self, request):
+    #     token = request.COOKIES.get('jwt')
+    #     payload = isAuthen(token)
+    #     data = request.data
+    #     response = dynamoCreateTransform(data, payload)
+    #     request.data['owner'] = payload['id']
+    #     request.data['uuid'] = response['UUID']
+    #     serializer = TransformSerializer(data=request.data)
+    #     serializer.context['owner_id'] = payload['id']
+    #     serializer.context['uuid'] = response['UUID']
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response({"HTTPStatusCode": response['HTTPStatusCode'], "uuid": response['UUID']})

@@ -6,14 +6,15 @@ import pandas as pd
 from db_handler.dbConnect import getEngine, sensitiveCensor
 
 def showData(connection_data):
+  print(connection_data)
   try:
     connection_string = getEngine(connection_data)
     alchemyEngine   = create_engine(connection_string, pool_recycle=3600)
     dbConnection    = alchemyEngine.connect()
-    sql_script = "select * from " + connection_data[-1]
+    sql_script = "select * from " + connection_data[-2]
     dataFrame       = pd.read_sql(str(sql_script), dbConnection)
     pd.set_option('display.expand_frame_repr', False)
-    if connection_data[-2] == True:
+    if connection_data[-3] == True:
       df = sensitiveCensor(dataFrame)
     else:
       df = dataFrame
@@ -29,7 +30,9 @@ def getSchema(connection_data):
     alchemyEngine   = create_engine(connection_string, pool_recycle=3600)
     dbConnection    = alchemyEngine.connect()
     md = sqlalchemy.MetaData()
-    table = sqlalchemy.Table(connection_data[-1], md, autoload=True, autoload_with=dbConnection)
+    # print(connection_data)
+    table = sqlalchemy.Table(connection_data[-2], md, autoload=True, autoload_with=dbConnection)
+    # print(table)
     columns = table.c
     schema = dict()
     for c in columns:

@@ -24,8 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = ')61$)qzp=ie*1i^rt4!rz573(2dvd(8*xlx3z_^4b!u^&nx1x('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-# DEBUG = True
+# DEBUG = False
+DEBUG = True
 
 # Backend Address
 # ALLOWED_HOSTS = ['tp4y0cq38c.execute-api.us-east-1.amazonaws.com', 'localhost:8000']

@@ -42,12 +42,16 @@ class PrepareTableView(APIView):
             password = dest_serializer.data['password']
             host = dest_serializer.data['host']
             table = dest_serializer.data['tablename']
+            port = dest_serializer.data['port']
             isSensitive = pipeline_serializer.data['isSensitive']
             connection_data = [db_engine, user, password,
-                               host, database, isSensitive, table]
+                               host, database, isSensitive, table, port]
             dynamo_response = dynamoGetTransform(transform_serializer.data)
+            # print(dynamo_response)
             schema = getSchema(connection_data)
-            head = showData(connection_data)
+            # print(schema)
+            # head = showData(connection_data)
+            # print(head)
         except:
             raise Http404
         # transform_data = {
@@ -55,8 +59,12 @@ class PrepareTableView(APIView):
         transform_data = {
             "schemas": dynamo_response['Item']['SCHEMAS']}
         dest_data = {"schemas": schema if schema != table else "unavailable"}
-        response = {"detail": "available" if checkTable(connection_data) else "no such table", "table_schema" if schema !=
-                    table else "required_table": schema, "transform_data": transform_data, "dest_data": dest_data}
+        if checkTable(connection_data)['status'] == False:
+            response = {"detail": "no such table", "source_schema" if schema !=
+                        table else "required_source_table": schema, "transform_data": transform_data, "dest_data": dest_data}
+        else:
+            response = {"detail": "available", "source_schema" if schema !=
+                        table else "required_table": schema, "transform_data": transform_data, "dest_data": dest_data}
         return Response(response)
 
 
@@ -80,16 +88,19 @@ class ApplyTableView(APIView):
             password = dest_serializer.data['password']
             host = dest_serializer.data['host']
             table = dest_serializer.data['tablename']
+            port = dest_serializer.data['port']
             isSensitive = pipeline_serializer.data['isSensitive']
             connection_data = [db_engine, user, password,
-                               host, database, isSensitive, table]
+                               host, database, isSensitive, table, port]
             try:
                 dynamo_response = dynamoGetTransform(transform_serializer.data)
+                print(dynamo_response['Item']['SCHEMAS'])
                 if request.data['create_table']:
                     create_status = createTable(connection_data,
                                                 dynamo_response['Item']['SCHEMAS'], request.data['pk'])
                     table_status = checkTable(connection_data)
-                    response = {"table_name": table, "schemas_to_apply": dynamo_response['Item']['SCHEMAS'], "detail": create_status}
+                    response = {
+                        "table_name": table, "schemas_to_apply": dynamo_response['Item']['SCHEMAS'], "detail": create_status}
                 else:
                     response = {
                         "detail": "Execution Cancled. Any change will not apply."}
@@ -122,14 +133,31 @@ class ApplyMigrateView(APIView):
             table = source_serializer.data['tablename']
             port = source_serializer.data['port']
             connection_data = [db_engine, user, password,
-                            host, port, database, table]
+                               host, database, 0, table, port]
+            # connection_data = [db_engine, user, password,
+            #                 host, port, database, table]
             try:
                 response = dynamoGetTransform(transform_serializer.data)
-                tmp = exportData(connection_data, payload['id'], response)
-                importData(tmp, response)
-                removeLocalData(tmp[1])
+                dest = Dest.objects.filter(owner_id=payload['id']).get(
+                    pk=pipeline_serializer.data['dest'])
+                dest_serializer = DestSerializer(dest)
+                database = dest_serializer.data['database']
+                db_engine = dest_serializer.data['engine']
+                user = dest_serializer.data['user']
+                password = dest_serializer.data['password']
+                host = dest_serializer.data['host']
+                table = dest_serializer.data['tablename']
+                port = dest_serializer.data['port']
+                dest_connection_data = [db_engine, user, password,
+                                        host, database, 0, table, port]
+                # print("Exporting....")
+                exp = exportData(connection_data, payload['id'], response)
+                # print("Importing....")
+                imp = importData(dest_connection_data, exp[1], response)
+                # print("Removing....")
+                rmv = removeLocalData(exp[1])
             except:
                 return HttpResponseServerError()
         except:
             raise Http404
-        return Response(response['Item'])
+        return Response({"export": exp[2], "import": imp, "remove": rmv})

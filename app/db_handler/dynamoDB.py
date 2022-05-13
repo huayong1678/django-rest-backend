@@ -90,7 +90,7 @@ def dynamoCreateTransform(data, payload):
     response = dynamoCheck()
     u = uuid.uuid4()
     s = shortuuid.encode(u)
-    TAGS, SCRIPTS, SCHEMAS, pk = [], [], {}, data['pk']
+    TAGS, SCRIPTS, SCHEMAS, pk, test = [], [], {}, data['pk'], []
     TAGS.append(data['tags'])
     if len(data['scripts']) != 0:
         for item in data['scripts']:
@@ -99,13 +99,16 @@ def dynamoCreateTransform(data, payload):
         SCRIPTS = [""]
     # for item in data['schemas'].items():
     #     # SCHEMAS.append(item)
-    #     print(item)
     # SCHEMAS = data['schemas']
-    # print(data['schemas'])
     for k, v in data['schemas'].items():
-        # print(k, v)
-        SCHEMAS[k] = {'S': v}
-        # print(SCHEMAS)
+        # SCHEMAS[k] = {'S': v}
+        test.append({'M': {k: {'S': v}}})
+    # print(test)
+    # print(SCHEMAS)
+    # for i in test:
+    #     for k, v in i.items():
+    #         for kk, vv in v.items():
+    #             print(kk, vv)
     OWNER_ID = str(payload['id'])
     try:
         response = dynamodb.put_item(
@@ -114,8 +117,9 @@ def dynamoCreateTransform(data, payload):
                 'OWNER_ID': {'N': OWNER_ID},
                 'UUID': {'S': s},
                 'TAGS': {'SS': TAGS},
-                # 'SCRIPTS': {'SS': SCRIPTS},
-                'SCHEMAS': {'M': SCHEMAS},
+                # 'SCRIPTS': {'SS': SCRIPTS}, 
+                # 'SCHEMAS': {'M': SCHEMAS},
+                'SCHEMAS': {'L': test},
                 'PK': {'S': pk},
             }
         )
@@ -129,8 +133,10 @@ def dynamoGetTransform(data):
     dynamodb = boto3.resource(
         'dynamodb', endpoint_url='http://localhost:8007', config=config)
     table = dynamodb.Table(TABLE_NAME)
+    # response = table.get_item(
+    #     Key={'UUID': data['uuid'], 'OWNER_ID': data['owner']})
     response = table.get_item(
-        Key={'UUID': data['uuid'], 'OWNER_ID': data['owner']})
+        Key={'UUID': data['uuid']})
     response['id'] = data['id']
     return response
 
@@ -139,7 +145,7 @@ def dynamoUpdateTransform(data, payload, uuid, id):
     response = dynamoCheck()
     # u = uuid.uuid4()
     # s = shortuuid.encode(u)
-    TAGS, SCRIPTS, SCHEMAS = [], [], {}
+    TAGS, SCRIPTS, SCHEMAS, PK = [], [], [], data['pk']
     TAGS.append(data['tags'])
     if len(data['scripts']) != 0:
         for item in data['scripts']:
@@ -147,7 +153,8 @@ def dynamoUpdateTransform(data, payload, uuid, id):
     else:
         SCRIPTS = [""]
     for k, v in data['schemas'].items():
-        SCHEMAS[k] = {'S': v}
+        # SCHEMAS[k] = {'S': v}
+        SCHEMAS.append({'M': {k: {'S': v}}})
     OWNER_ID = str(payload['id'])
     try:
         dynamodb = boto3.resource(
@@ -156,13 +163,14 @@ def dynamoUpdateTransform(data, payload, uuid, id):
         table.update_item(
             Key={
                 'UUID': str(uuid),
-                'OWNER_ID': payload['id']
+                # 'OWNER_ID': payload['id']
             },
-            UpdateExpression="SET TAGS=:val1, SCHEMAS=:val2, PK=:val3",
+            UpdateExpression="SET TAGS=:val1, SCHEMAS=:val2, PK=:val3, SCRIPTS=:val4",
             ExpressionAttributeValues={
                 ':val1': TAGS,
                 ':val2': SCHEMAS,
                 ':val3': PK,
+                ':val4': SCRIPTS,
             },
         )
         data = {'uuid': uuid, 'owner': payload['id'], 'id': id}
