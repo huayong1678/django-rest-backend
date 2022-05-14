@@ -3,7 +3,7 @@
     "name": "django-app",
     "image": "${docker_image_url_django}",
     "essential": true,
-    "cpu": 10,
+    "cpu": 256,
     "memory": 512,
     "links": [],
     "portMappings": [
@@ -42,6 +42,14 @@
       {
         "name": "AWS_DEFAULT_REGION",
         "value": "${region}"
+      },
+      {
+        "name": "IS_DYNAMO_EXIST",
+        "value": "${dynamo}"
+      },
+      {
+        "name": "S3_BUCKET",
+        "value": "${s3_bucket}"
       }
     ],
     "mountPoints": [
@@ -63,8 +71,8 @@
     "name": "nginx",
     "image": "${docker_image_url_nginx}",
     "essential": true,
-    "cpu": 10,
-    "memory": 128,
+    "cpu": 256,
+    "memory": 256,
     "links": ["django-app"],
     "portMappings": [
       {

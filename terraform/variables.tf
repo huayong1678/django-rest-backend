@@ -49,7 +49,7 @@ variable "amis" {
   description = "Which AMI to spawn."
   default = {
     us-west-1 = "ami-0bd3976c0dbacc605",
-    us-east-1 = "ami-0f260fe26c2826a3d"
+    us-east-1 = "ami-061c10a2cb32f3491"
   }
 }
 variable "instance_type" {

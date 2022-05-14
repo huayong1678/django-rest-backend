@@ -11,7 +11,7 @@ resource "aws_launch_configuration" "ecs" {
   # key_name                    = aws_key_pair.production.key_name
   key_name                    = "etl-backend-ecs"
   associate_public_ip_address = true
-  user_data                   = "#!/bin/bash\necho ECS_CLUSTER='${var.ecs_cluster_name}-cluster' > /etc/ecs/ecs.config"
+  user_data                   = "#!/bin/bash\necho ECS_CLUSTER='${var.ecs_cluster_name}-cluster' > /etc/ecs/ecs.config\necho ECS_CONTAINER_START_TIMEOUT='5m' >> /etc/ecs/ecs.config"
 }
 
 data "template_file" "app" {
@@ -26,6 +26,8 @@ data "template_file" "app" {
     rds_password            = var.rds_password
     rds_hostname            = aws_db_instance.production.address
     allowed_hosts           = var.allowed_hosts
+    dynamo                  = true
+    s3_bucket               = aws_s3_bucket.dump_bucket.id
   }
 }
 
@@ -45,12 +47,12 @@ resource "aws_ecs_task_definition" "app" {
 }
 
 resource "aws_ecs_service" "production" {
-  name            = "${var.ecs_cluster_name}-service"
-  cluster         = aws_ecs_cluster.production.id
-  task_definition = aws_ecs_task_definition.app.arn
-  iam_role        = aws_iam_role.ecs-service-role.arn
-  desired_count   = var.app_count
-  depends_on      = [aws_alb_listener.ecs-alb-http-listener, aws_iam_role_policy.ecs-service-role-policy]
+  name                 = "${var.ecs_cluster_name}-service"
+  cluster              = aws_ecs_cluster.production.id
+  task_definition      = aws_ecs_task_definition.app.arn
+  iam_role             = aws_iam_role.ecs-service-role.arn
+  desired_count        = var.app_count
+  depends_on           = [aws_alb_listener.ecs-alb-http-listener, aws_iam_role_policy.ecs-service-role-policy]
   force_new_deployment = true
   load_balancer {
     target_group_arn = aws_alb_target_group.default-target-group.arn

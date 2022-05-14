@@ -27,12 +27,16 @@ import time
 import psutil
 import pandas as pd
 
-
-AWS_BUCKET_NAME = 'etl-dump-bucket-d56550'
+if 'S3_BUCKET' in os.environ:
+    AWS_BUCKET_NAME = os.environ['S3_BUCKET']
+else:
+    AWS_BUCKET_NAME = 'etl-dump-bucket-d56550'
 dt_string = datetime.datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
 file_name = f'{dt_string}'
-file_path = f"{os.getcwd()}/tmp/{file_name}"
-
+if 'IS_EFS_EXIST' in os.environ:
+    file_path = f"/usr/share/tmp/{file_name}"
+else:
+    file_path = f"{os.getcwd()}/tmp/{file_name}"
 
 def exportData(connection_data, owner_id, dynamo_data):
     AWS_BUCKET_PATH = f'{owner_id}/'

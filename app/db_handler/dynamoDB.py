@@ -4,12 +4,16 @@ import json
 import uuid
 import shortuuid
 from botocore.exceptions import ClientError
+import os
 
 config = Config(
     connect_timeout=3, read_timeout=3,
     retries={'max_attempts': 3})
-dynamodb = boto3.client(
-    'dynamodb', endpoint_url='http://localhost:8007', config=config)
+if 'IS_DYNAMO_EXIST' in os.environ:
+    dynamodb = boto3.client('dynamodb', config=config)
+else:
+    dynamodb = boto3.client(
+        'dynamodb', endpoint_url='http://localhost:8007', config=config)
 TABLE_NAME = "Transforms"
 
 
@@ -54,36 +58,38 @@ def dynamoTransformsTable():
     dynamoCheck()
 
 
-def dynamoLogTable():
-    dynamo_config = Config(
-        connect_timeout=3, read_timeout=3, retries={'max_attempts': 3})
-    dynamodb_client = boto3.client(
-        'dynamodb', endpoint_url='http://localhost:8007', config=dynamo_config)
-    existing_tables = dynamodb_client.list_tables()['TableNames']
-    # print(existing_tables)
-    try:
-        table = dynamodb_client.create_table(
-            TableName='MigrationLogs',
-            KeySchema=[
-                {
-                    'AttributeName': 'MID',
-                    'KeyType': 'HASH'
-                }
-            ],
-            AttributeDefinitions=[
-                {
-                    'AttributeName': 'MID',
-                    'AttributeType': 'S'
-                }
-            ],
-            ProvisionedThroughput={
-                'ReadCapacityUnits': 1,
-                'WriteCapacityUnits': 1
-            }
-        )
-        table.wait_until_exists()
-    except ClientError as ce:
-        print(ce.response)
+# def dynamoLogTable():
+#     dynamo_config = Config(
+#         connect_timeout=3, read_timeout=3, retries={'max_attempts': 3})
+#     if 'IS_DYNAMO_EXIST' in os.environ:
+#         dynamodb_client = boto3.client('dynamodb', config=dynamo_config)
+#     else:
+#         dynamodb_client = boto3.client('dynamodb', endpoint_url='http://localhost:8007', config=dynamo_config)
+#     existing_tables = dynamodb_client.list_tables()['TableNames']
+#     # print(existing_tables)
+#     try:
+#         table = dynamodb_client.create_table(
+#             TableName='MigrationLogs',
+#             KeySchema=[
+#                 {
+#                     'AttributeName': 'MID',
+#                     'KeyType': 'HASH'
+#                 }
+#             ],
+#             AttributeDefinitions=[
+#                 {
+#                     'AttributeName': 'MID',
+#                     'AttributeType': 'S'
+#                 }
+#             ],
+#             ProvisionedThroughput={
+#                 'ReadCapacityUnits': 1,
+#                 'WriteCapacityUnits': 1
+#             }
+#         )
+#         table.wait_until_exists()
+#     except ClientError as ce:
+#         print(ce.response)
 
 
 def dynamoCreateTransform(data, payload):
