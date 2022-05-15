@@ -87,3 +87,26 @@ resource "aws_route" "public-internet-igw-route" {
   gateway_id             = aws_internet_gateway.production-igw.id
   destination_cidr_block = "0.0.0.0/0"
 }
+
+# VPC Default SG
+resource "aws_default_security_group" "vpc_default_security_group" {
+  vpc_id = aws_vpc.production-vpc.id
+
+  ingress {
+    protocol  = -1
+    from_port = 0
+    to_port   = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = format("%s%s", var.infra_name, "vpc-default-sg")
+  }
+}

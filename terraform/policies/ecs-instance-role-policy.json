@@ -11,7 +11,9 @@
         "cloudwatch:*",
         "s3:*",
         "rds:*",
-        "logs:*"
+        "logs:*",
+        "dynamodb:*",
+        "efs:*"
       ],
       "Resource": "*"
     }
