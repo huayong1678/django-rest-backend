@@ -30,7 +30,7 @@ import pandas as pd
 if 'S3_BUCKET' in os.environ:
     AWS_BUCKET_NAME = os.environ['S3_BUCKET']
 else:
-    AWS_BUCKET_NAME = 'etl-dump-bucket-d56550'
+    AWS_BUCKET_NAME = 'etl-dump-bucket-bfe078'
 dt_string = datetime.datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
 file_name = f'{dt_string}'
 if 'IS_EFS_EXIST' in os.environ:
@@ -78,9 +78,8 @@ def exportData(connection_data, owner_id, dynamo_data):
         else:
             file_size = str(os.path.getsize(f'{file_path}.csv')/1000000) + " MB(s)"
         print(file_size)
-        print("Start Uploading...")
-        multi_part_upload_with_s3(
-            file_path + ".csv", file_name, AWS_BUCKET_PATH)
+        # multi_part_upload_with_s3(
+        #     file_path + ".csv", file_name, AWS_BUCKET_PATH)
         # psutil.cpu_percent()
         # psutil.virtual_memory()
         # dict(psutil.virtual_memory()._asdict())
@@ -89,7 +88,7 @@ def exportData(connection_data, owner_id, dynamo_data):
         # print("Memory Usage: " + str(psutil.virtual_memory().percent) + " %")
         # return [connection_string, (file_path + '.csv'), connection_data[-1]]
         df = pd.read_csv(f'{file_path}.csv')
-        return [0, str(file_path + '.csv'), {"rows": (str(len(df.index)) + ' row(s)'), "size": file_size, "time": (str(end-start) + " second(s)")}]
+        return [0, str(file_path + '.csv'), file_name, {"rows": (str(len(df.index)) + ' row(s)'), "size": file_size, "time": (str(end-start) + " second(s)")}]
     except sqlalchemy.exc.SQLAlchemyError as e:
         return str(e)
 
@@ -149,13 +148,20 @@ def migrate_log():
 
 
 def multi_part_upload_with_s3(file_path, file_name, bucket_path):
+    print("Start Uploading...")
+    print(file_path, file_name, bucket_path)
     start = time.time()
+    if os.path.getsize(file_path,)/1000000 >= 1000:
+        file_size = str(os.path.getsize(file_path)/1000000000) + " GB(s)"
+    else:
+        file_size = str(os.path.getsize(file_path)/1000000) + " MB(s)"
     s3 = boto3.resource('s3')
     s3_config = TransferConfig(multipart_threshold=1024 * 25, max_concurrency=10,
-                               multipart_chunksize=1024 * 25, use_threads=True)
-    s3.meta.client.upload_file(file_path, AWS_BUCKET_NAME, bucket_path+file_name+".csv", ExtraArgs={
-                               'ACL': 'private', 'ContentType': 'text/plain', 'ServerSideEncryption': 'AES256'}, Config=s3_config, Callback=ProgressPercentage(file_path))
+                            multipart_chunksize=1024 * 25, use_threads=True)
+    s3.meta.client.upload_file(file_path, AWS_BUCKET_NAME, str(str(bucket_path) + "/" + file_name +".csv"), ExtraArgs={
+                            'ACL': 'private', 'ContentType': 'text/plain', 'ServerSideEncryption': 'AES256'}, Config=s3_config, Callback=ProgressPercentage(file_path))
     end = time.time()
+    return {"size": file_size, "time": (str(end-start) + " second(s)")}
     print("\nExecution Time: " + str(end-start) + " second(s)")
 
 

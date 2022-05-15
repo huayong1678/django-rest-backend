@@ -153,4 +153,4 @@ venv/
 terraform/main-infra-with-public-rds
 s3-s-d
 # tmp/
-# tmp/*
+tmp/*
