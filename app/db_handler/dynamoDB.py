@@ -136,8 +136,10 @@ def dynamoCreateTransform(data, payload):
 
 def dynamoGetTransform(data):
     response = dynamoCheck()
-    dynamodb = boto3.resource(
-        'dynamodb', endpoint_url='http://localhost:8007', config=config)
+    if 'IS_DYNAMO_EXIST' in os.environ:
+        dynamodb = boto3.resource('dynamodb', config=config)
+    else:
+        dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:8007', config=config)
     table = dynamodb.Table(TABLE_NAME)
     # response = table.get_item(
     #     Key={'UUID': data['uuid'], 'OWNER_ID': data['owner']})
@@ -163,8 +165,10 @@ def dynamoUpdateTransform(data, payload, uuid, id):
         SCHEMAS.append({'M': {k: {'S': v}}})
     OWNER_ID = str(payload['id'])
     try:
-        dynamodb = boto3.resource(
-            'dynamodb', endpoint_url='http://localhost:8007', config=config)
+        if 'IS_DYNAMO_EXIST' in os.environ:
+            dynamodb = boto3.resource('dynamodb', config=config)
+        else:
+            dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:8007', config=config)
         table = dynamodb.Table('Transforms')
         table.update_item(
             Key={
