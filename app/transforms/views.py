@@ -32,7 +32,7 @@ class CreateTransformView(APIView):
         serializer.context['uuid'] = response['UUID']
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({"HTTPStatusCode": response['HTTPStatusCode'], "uuid": response['UUID']})
+        return Response({"HTTPStatusCode": response['HTTPStatusCode'], "uuid": response['UUID'], "pipeline_id": response['pipeline_id']})
 
 class DeleteTransformView(APIView):
     def get(self, request, pk):

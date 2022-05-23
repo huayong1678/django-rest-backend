@@ -96,7 +96,7 @@ def dynamoCreateTransform(data, payload):
     response = dynamoCheck()
     u = uuid.uuid4()
     s = shortuuid.encode(u)
-    TAGS, SCRIPTS, SCHEMAS, pk, test = data['tags'], [], {}, data['pk'], []
+    TAGS, SCRIPTS, SCHEMAS, pk, test, pipeline_id = data['tags'], [], {}, data['pk'], [], str(data['pipeline_id'])
     # TAGS.append(data['tags'])
     if len(data['scripts']) != 0:
         for item in data['scripts']:
@@ -127,9 +127,10 @@ def dynamoCreateTransform(data, payload):
                 # 'SCHEMAS': {'M': SCHEMAS},
                 'SCHEMAS': {'L': test},
                 'PK': {'S': pk},
+                'PIPELINE_ID': {'N': pipeline_id}
             }
         )
-        return {"HTTPStatusCode": response['ResponseMetadata']['HTTPStatusCode'], "UUID": s}
+        return {"HTTPStatusCode": response['ResponseMetadata']['HTTPStatusCode'], "UUID": s, "pipeline_id": data['pipeline_id']}
     except ClientError as ce:
         return {ce.response['Error']['Code']: ce.response['Error']['Message']}
 
