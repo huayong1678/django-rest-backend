@@ -71,6 +71,7 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     'core.middleware.HealthCheckMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
