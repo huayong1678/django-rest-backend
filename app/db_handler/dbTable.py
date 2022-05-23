@@ -53,7 +53,8 @@ def scriptGenerate(table, schemas, pk, type):
         for i in schemas:
             for k, v in i.items():
                 if k == pk:
-                    script += f"{k} {v} PRIMARY KEY, "
+                    # script += f"{k} {v} PRIMARY KEY, "
+                    script += f"{k} SERIAL PRIMARY KEY, "
                 elif i == schemas[-1]:
                     script += f"{k} {v});"
                 else:

@@ -40,53 +40,28 @@ else:
 
 def exportData(connection_data, owner_id, dynamo_data):
     AWS_BUCKET_PATH = f'{owner_id}/'
-    # print(connection_data)
     os.environ["PGPASSWORD"] = str(connection_data[2])
-    # connection_string = f'postgresql+psycopg2://{connection_data[1]}:{connection_data[2]}@{connection_data[3]}:{connection_data[-1]}/{connection_data[4]}'
-    # tmp = [connection_data[0], connection_data[1], connection_data[2],
-    #        connection_data[3], connection_data[4], False, connection_data[-1]]
     connection_string = getEngine(connection_data)
-    # print("BF Strip: " +connection_string)
     connection_string = connection_string[:10:] + connection_string[19:]
-    # print("AF Strip: " +connection_string)
     try:
-        print("Start Exporting...")
         start = time.time()
         schemas, pk = list(), dynamo_data['Item']['PK']
-        # print(dynamo_data['Item']['SCHEMAS'])
-        # schemas.append(pk)
         for i in dynamo_data['Item']['SCHEMAS']:
             for k,v in i.items():
                 if k == dynamo_data['Item']['PK']:
                     pass
+                    # schemas.append(k)
                 else:
                     schemas.append(k)
-        # for k,v in dynamo_data['Item']['SCHEMAS'].items():
-        #     schemas.append(k)
         schemas = ', '.join(schemas)
-        # print(schemas)
         process = subprocess.Popen(['psql', connection_string, '--echo-all', '-c',
                                     f'\\copy (SELECT {schemas} FROM {connection_data[-2]}) to  \'{file_path}.csv\' csv header;'], stdout=subprocess.PIPE)
         process.communicate()[0]
-        # get output from process "Something to print"
-        # one_line_output = process.stdout.readline()
-        # print(one_line_output)
         end = time.time()
-        print("Execution Time: " + str(end-start) + " second(s)")
         if os.path.getsize(f'{file_path}.csv')/1000000 >= 1000:
             file_size = str(os.path.getsize(f'{file_path}.csv')/1000000000) + " GB(s)"
         else:
             file_size = str(os.path.getsize(f'{file_path}.csv')/1000000) + " MB(s)"
-        print(file_size)
-        # multi_part_upload_with_s3(
-        #     file_path + ".csv", file_name, AWS_BUCKET_PATH)
-        # psutil.cpu_percent()
-        # psutil.virtual_memory()
-        # dict(psutil.virtual_memory()._asdict())
-        # print("\nMemory Usage: " +
-        #       str((psutil.virtual_memory().used/1000000)/1000) + " GB(s)")
-        # print("Memory Usage: " + str(psutil.virtual_memory().percent) + " %")
-        # return [connection_string, (file_path + '.csv'), connection_data[-1]]
         df = pd.read_csv(f'{file_path}.csv')
         return [0, str(file_path + '.csv'), file_name, {"rows": (str(len(df.index)) + ' row(s)'), "size": file_size, "time": (str(end-start) + " second(s)")}]
     except sqlalchemy.exc.SQLAlchemyError as e:
@@ -95,31 +70,23 @@ def exportData(connection_data, owner_id, dynamo_data):
 
 def importData(export_data, path, dynamo_data):
     connection_string = getEngine(export_data)
-    # print("BF Strip: " +connection_string)
     connection_string = connection_string[:10:] + connection_string[19:]
-    # print("AF Strip: " +connection_string)
     start = time.time()
     schemas = []
-    print("Start Importing...")
-    # print(export_data)
-    # print(path)
     for i in dynamo_data['Item']['SCHEMAS']:
         for k,v in i.items():
             if k == dynamo_data['Item']['PK']:
                 pass
             else:
                 schemas.append(k)
-    # for k,v in dynamo_data['Item']['SCHEMAS'].items():
-    #     schemas.append(k)
     schemas = ', '.join(schemas)
     try:
-        # print(export_data[-2])
         df = pd.read_csv(path)
         process = subprocess.Popen(['psql', connection_string, '--echo-all', '-c',
                                 f'\\copy {export_data[-2]}({schemas}) FROM \'{path}\' DELIMITER \',\' CSV HEADER;'], stdout=PIPE)
         process.communicate("n\n")[0]
-        process = subprocess.Popen(['psql', connection_string, '--echo-all', '-c', f'SELECT reltuples::bigint AS estimate FROM   pg_class WHERE  oid = \'{export_data[-2]}\'::regclass;'])
-        process.communicate("n\n")[0]
+        # process = subprocess.Popen(['psql', connection_string, '--echo-all', '-c', f'SELECT reltuples::bigint AS estimate FROM pg_class WHERE oid = \'{export_data[-2]}\'::regclass;'])
+        # process.communicate("n\n")[0]
         try:
             if os.path.getsize(f'{file_path}.csv')/1000000 >= 1000:
                 file_size = str(os.path.getsize(path)/1000000000) + " GB(s)"
@@ -132,7 +99,6 @@ def importData(export_data, path, dynamo_data):
     except sqlalchemy.exc.SQLAlchemyError as e:
         return str(e)
     del os.environ["PGPASSWORD"]
-    print("Execution Time: " + str(end-start) + " second(s)")
 
 
 def removeLocalData(file_path):
@@ -148,8 +114,6 @@ def migrate_log():
 
 
 def multi_part_upload_with_s3(file_path, file_name, bucket_path):
-    print("Start Uploading...")
-    print(file_path, file_name, bucket_path)
     start = time.time()
     if os.path.getsize(file_path,)/1000000 >= 1000:
         file_size = str(os.path.getsize(file_path)/1000000000) + " GB(s)"
@@ -162,7 +126,6 @@ def multi_part_upload_with_s3(file_path, file_name, bucket_path):
                             'ACL': 'private', 'ContentType': 'text/plain', 'ServerSideEncryption': 'AES256'}, Config=s3_config, Callback=ProgressPercentage(file_path))
     end = time.time()
     return {"size": file_size, "time": (str(end-start) + " second(s)")}
-    print("\nExecution Time: " + str(end-start) + " second(s)")
 
 
 class ProgressPercentage(object):
