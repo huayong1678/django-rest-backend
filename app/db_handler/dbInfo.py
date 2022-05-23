@@ -19,7 +19,7 @@ def showData(connection_data):
     else:
       df = dataFrame
     dbConnection.close()
-    return df.head(10)
+    return [df.head(10), getSchema(connection_data)]
   except SQLAlchemyError as e:
     error = str(e.__dict__['orig'])
     return error

@@ -96,8 +96,8 @@ def dynamoCreateTransform(data, payload):
     response = dynamoCheck()
     u = uuid.uuid4()
     s = shortuuid.encode(u)
-    TAGS, SCRIPTS, SCHEMAS, pk, test = [], [], {}, data['pk'], []
-    TAGS.append(data['tags'])
+    TAGS, SCRIPTS, SCHEMAS, pk, test = data['tags'], [], {}, data['pk'], []
+    # TAGS.append(data['tags'])
     if len(data['scripts']) != 0:
         for item in data['scripts']:
             SCRIPTS.append(item)
@@ -122,7 +122,7 @@ def dynamoCreateTransform(data, payload):
             Item={
                 'OWNER_ID': {'N': OWNER_ID},
                 'UUID': {'S': s},
-                'TAGS': {'SS': TAGS},
+                'TAGS': {'S': TAGS},
                 # 'SCRIPTS': {'SS': SCRIPTS}, 
                 # 'SCHEMAS': {'M': SCHEMAS},
                 'SCHEMAS': {'L': test},
@@ -153,8 +153,8 @@ def dynamoUpdateTransform(data, payload, uuid, id):
     response = dynamoCheck()
     # u = uuid.uuid4()
     # s = shortuuid.encode(u)
-    TAGS, SCRIPTS, SCHEMAS, PK = [], [], [], data['pk']
-    TAGS.append(data['tags'])
+    TAGS, SCRIPTS, SCHEMAS, PK = data['tags'], [], [], data['pk']
+    # TAGS.append(data['tags'])
     if len(data['scripts']) != 0:
         for item in data['scripts']:
             SCRIPTS.append(item)
