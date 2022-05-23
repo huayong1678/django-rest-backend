@@ -90,8 +90,8 @@ MIDDLEWARE = [
 #     'django.contrib.auth.hashers.ScryptPasswordHasher',
 # ]
 
-CORS_ORIGIN_ALLOW_ALL = True
-# CORS_ORIGIN_WHITELIST = ['http://localhost:3000', 'https://d1wne19icordtc.cloudfront.net']
+# CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = ['https://d2l6qgsxbagd66.cloudfront.net']
 CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'core.urls'
