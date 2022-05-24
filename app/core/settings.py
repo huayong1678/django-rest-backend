@@ -24,12 +24,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = ')61$)qzp=ie*1i^rt4!rz573(2dvd(8*xlx3z_^4b!u^&nx1x('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-# DEBUG = True
+# DEBUG = False
+DEBUG = True
 
 # Backend Address
 # ALLOWED_HOSTS = ['tp4y0cq38c.execute-api.us-east-1.amazonaws.com', 'localhost:8000']
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split()
+if 'ALLOWED_HOSTS' in os.environ:
+    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split()
+else:
+    ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -52,18 +55,10 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
-        # 'rest_framework.authentication.BasicAuthentication',
-    ],
     'DEFAULT_PERMISSION_CLASSES': [
         # 'rest_framework.permissions.IsAuthenticated',
         'rest_framework.permissions.AllowAny',
     ],
-    # 'DEFAULT_AUTHENTICATION_CLASSES': [
-    # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-    # ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ],

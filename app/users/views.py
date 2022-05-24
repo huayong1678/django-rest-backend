@@ -3,6 +3,7 @@ from urllib import response
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.parsers import JSONParser, FormParser
 from rest_framework.exceptions import AuthenticationFailed
 from .serializers import UserSerializer
 from .models import User
@@ -10,7 +11,8 @@ import jwt, datetime
 from jwt_authentication.jwtAuth import *
 
 class RegisterView(APIView):
-    def post(self, request):
+    parser_classes = [JSONParser]
+    def post(self, request, format=None):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
