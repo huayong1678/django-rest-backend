@@ -53,7 +53,7 @@ variable "amis" {
   }
 }
 variable "instance_type" {
-  default = "t3.micro"
+  default = "t3.small"
 }
 variable "docker_image_url_django" {
   description = "Docker image to run in the ECS cluster"
@@ -65,7 +65,7 @@ variable "docker_image_url_nginx" {
 }
 variable "app_count" {
   description = "Number of Docker containers to run"
-  default     = 2
+  default     = 4
 }
 variable "allowed_hosts" {
   description = "Domain name for allowed hosts"
