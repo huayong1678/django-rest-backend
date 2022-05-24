@@ -4,10 +4,13 @@ import jwt
 
 
 def isAuthen(token):
-  if not token:
-      raise AuthenticationFailed('Unauthenticated!')
-  try:
-      payload = jwt.decode(token, 'secret', algorithm=['HS256'])
-      return payload
-  except jwt.ExpiredSignatureError:
-      raise AuthenticationFailed('Unauthenticated!')
+    return jwt.decode(token, 'secret', algorithm=['HS256']) 
+#   if not token:
+#       raise AuthenticationFailed('Unauthenticated!')
+#   try:
+#       print(token)
+#       payload = jwt.decode(token, 'secret', algorithm=['HS256'])
+#       print(payload)
+#       return payload
+#   except jwt.ExpiredSignatureError:
+#       raise AuthenticationFailed('Unauthenticated!')

@@ -25,7 +25,9 @@ class CreateSource(APIView):
 class ListSource(APIView):
     def get(self, request):
         token = request.COOKIES.get('jwt')
+        print(token)
         payload = isAuthen(token)
+        print(payload)
         source = Source.objects.filter(owner_id=payload['id'])
         serializer = SourceSerializer(source, many=True)
         return Response(serializer.data)

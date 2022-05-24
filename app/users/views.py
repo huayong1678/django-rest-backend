@@ -11,8 +11,8 @@ import jwt, datetime
 from jwt_authentication.jwtAuth import *
 
 class RegisterView(APIView):
-    parser_classes = [JSONParser]
-    def post(self, request, format=None):
+    # parser_classes = [JSONParser]
+    def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -32,7 +32,7 @@ class LoginView(APIView):
 
         payload = {
             'id': user.id,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=360),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=36000),
             'iat': datetime.datetime.utcnow()
         }
 
