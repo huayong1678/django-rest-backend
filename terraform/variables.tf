@@ -69,7 +69,7 @@ variable "app_count" {
 }
 variable "allowed_hosts" {
   description = "Domain name for allowed hosts"
-  default     = "*"
+  default     = "production-alb-2495228.us-east-1.elb.amazonaws.com"
 }
 
 
