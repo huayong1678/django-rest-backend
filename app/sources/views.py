@@ -25,11 +25,16 @@ class CreateSource(APIView):
 class ListSource(APIView):
     def get(self, request):
         token = request.COOKIES.get('jwt')
+        print(request.COOKIES.get('csrftoken'))
+        print(request.COOKIES)
+        print(request.COOKIES.get('csrftoken'))
         print(token)
         payload = isAuthen(token)
         print(payload)
         source = Source.objects.filter(owner_id=payload['id'])
+        print(source)
         serializer = SourceSerializer(source, many=True)
+        print(serializer.data)
         return Response(serializer.data)
 
 

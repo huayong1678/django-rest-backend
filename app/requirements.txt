@@ -8,7 +8,8 @@ psycopg2-binary
 progressbar2
 boto3
 djangorestframework-jwt
-PyJWT==1.7.1
+# PyJWT==1.7.1
+PyJWT
 pytz
 zappa-django-utils
 pandas
